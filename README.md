@@ -142,7 +142,7 @@ Development is managed by a collaborative team with shared responsibility for:
 
 - Make regular, focused commits
 - Test features thoroughly before pushing
-- Update documentation as you develop
+- Update documentation following the development progress
 - Follow PSR-12 coding standards
 
 ## 🔒 Security
