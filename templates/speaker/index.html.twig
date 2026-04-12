@@ -1,20 +1,49 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello SpeakerController!{% endblock %}
+{% block title %}Speakers{% endblock %}
 
 {% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
+<div class="card">
+    <div class="actions">
+        <h1 style="margin: 0;">Speakers</h1>
+        <a class="btn" href="{{ path('app_speaker_new') }}">New Speaker</a>
+    </div>
 
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
-
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code>C:/Users/Gigabyte/Desktop/WebG301/conference_scheduler_fgw_hn/src/Controller/SpeakerController.php</code></li>
-        <li>Your template at <code>C:/Users/Gigabyte/Desktop/WebG301/conference_scheduler_fgw_hn/templates/speaker/index.html.twig</code></li>
-    </ul>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Company</th>
+                <th>User</th>
+                <th>Sessions</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for speaker in speakers %}
+            <tr>
+                <td>{{ speaker.id }}</td>
+                <td>{{ speaker.name }}</td>
+                <td>{{ speaker.email }}</td>
+                <td>{{ speaker.company }}</td>
+                <td>{{ speaker.user ? speaker.user.email : '-' }}</td>
+                <td>{{ speaker.sessions|length }}</td>
+                <td>
+                    <div class="actions">
+                        <a class="btn btn-secondary" href="{{ path('app_speaker_edit', {id: speaker.id}) }}">Edit</a>
+                        <form class="inline" method="post" action="{{ path('app_speaker_delete', {id: speaker.id}) }}" onsubmit="return confirm('Delete this speaker?');">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete_speaker_' ~ speaker.id) }}">
+                            <button class="btn btn-danger" type="submit">Delete</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+        {% else %}
+            <tr><td colspan="7">No speakers found.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
 </div>
 {% endblock %}

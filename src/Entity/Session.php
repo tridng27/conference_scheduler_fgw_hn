@@ -38,19 +38,19 @@ class Session
     private ?string $status = null;
 
     #[ORM\ManyToOne(inversedBy: 'sessions')]
-    private ?conference $conference = null;
+    private ?Conference $conference = null;
 
     /**
-     * @var Collection<int, speaker>
+     * @var Collection<int, Speaker>
      */
-    #[ORM\ManyToMany(targetEntity: speaker::class, inversedBy: 'sessions')]
-    private Collection $speaker;
+    #[ORM\ManyToMany(targetEntity: Speaker::class, inversedBy: 'sessions')]
+    private Collection $speakers;
 
     /**
-     * @var Collection<int, room>
+     * @var Collection<int, Room>
      */
-    #[ORM\ManyToMany(targetEntity: room::class, inversedBy: 'sessions')]
-    private Collection $room;
+    #[ORM\ManyToMany(targetEntity: Room::class, inversedBy: 'sessions')]
+    private Collection $rooms;
 
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $track = null;
@@ -60,8 +60,8 @@ class Session
 
     public function __construct()
     {
-        $this->speaker = new ArrayCollection();
-        $this->room = new ArrayCollection();
+        $this->speakers = new ArrayCollection();
+        $this->rooms = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -153,12 +153,12 @@ class Session
         return $this;
     }
 
-    public function getConference(): ?conference
+    public function getConference(): ?Conference
     {
         return $this->conference;
     }
 
-    public function setConference(?conference $conference): static
+    public function setConference(?Conference $conference): static
     {
         $this->conference = $conference;
 
@@ -166,49 +166,49 @@ class Session
     }
 
     /**
-     * @return Collection<int, speaker>
+     * @return Collection<int, Speaker>
      */
-    public function getSpeaker(): Collection
+    public function getSpeakers(): Collection
     {
-        return $this->speaker;
+        return $this->speakers;
     }
 
-    public function addSpeaker(speaker $speaker): static
+    public function addSpeaker(Speaker $speaker): static
     {
-        if (!$this->speaker->contains($speaker)) {
-            $this->speaker->add($speaker);
+        if (!$this->speakers->contains($speaker)) {
+            $this->speakers->add($speaker);
         }
 
         return $this;
     }
 
-    public function removeSpeaker(speaker $speaker): static
+    public function removeSpeaker(Speaker $speaker): static
     {
-        $this->speaker->removeElement($speaker);
+        $this->speakers->removeElement($speaker);
 
         return $this;
     }
 
     /**
-     * @return Collection<int, room>
+     * @return Collection<int, Room>
      */
-    public function getRoom(): Collection
+    public function getRooms(): Collection
     {
-        return $this->room;
+        return $this->rooms;
     }
 
-    public function addRoom(room $room): static
+    public function addRoom(Room $room): static
     {
-        if (!$this->room->contains($room)) {
-            $this->room->add($room);
+        if (!$this->rooms->contains($room)) {
+            $this->rooms->add($room);
         }
 
         return $this;
     }
 
-    public function removeRoom(room $room): static
+    public function removeRoom(Room $room): static
     {
-        $this->room->removeElement($room);
+        $this->rooms->removeElement($room);
 
         return $this;
     }

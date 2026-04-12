@@ -58,7 +58,7 @@ class Conference
     /**
      * @var Collection<int, Registration>
      */
-    #[ORM\ManyToMany(targetEntity: Registration::class, mappedBy: 'conference')]
+    #[ORM\ManyToMany(targetEntity: Registration::class, mappedBy: 'conferences')]
     private Collection $registrations;
 
     public function __construct()

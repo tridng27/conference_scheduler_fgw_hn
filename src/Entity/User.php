@@ -52,7 +52,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @var Collection<int, Registration>
      */
-    #[ORM\ManyToMany(targetEntity: Registration::class, mappedBy: 'usser')]
+    #[ORM\ManyToMany(targetEntity: Registration::class, mappedBy: 'users')]
     private Collection $registrations;
 
     public function __construct()
@@ -207,7 +207,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if (!$this->registrations->contains($registration)) {
             $this->registrations->add($registration);
-            $registration->addUsser($this);
+            $registration->addUser($this);
         }
 
         return $this;
@@ -216,7 +216,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function removeRegistration(Registration $registration): static
     {
         if ($this->registrations->removeElement($registration)) {
-            $registration->removeUsser($this);
+            $registration->removeUser($this);
         }
 
         return $this;

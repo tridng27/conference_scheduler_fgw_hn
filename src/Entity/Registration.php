@@ -22,24 +22,24 @@ class Registration
     private ?string $status = null;
 
     /**
-     * @var Collection<int, user>
+     * @var Collection<int, User>
      */
-    #[ORM\ManyToMany(targetEntity: user::class, inversedBy: 'registrations')]
-    private Collection $usser;
+    #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'registrations')]
+    private Collection $users;
 
     /**
-     * @var Collection<int, conference>
+     * @var Collection<int, Conference>
      */
-    #[ORM\ManyToMany(targetEntity: conference::class, inversedBy: 'registrations')]
-    private Collection $conference;
+    #[ORM\ManyToMany(targetEntity: Conference::class, inversedBy: 'registrations')]
+    private Collection $conferences;
 
     #[ORM\Column(length: 50, nullable: true)]
     private ?string $ticketType = null;
 
     public function __construct()
     {
-        $this->usser = new ArrayCollection();
-        $this->conference = new ArrayCollection();
+        $this->users = new ArrayCollection();
+        $this->conferences = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -72,49 +72,49 @@ class Registration
     }
 
     /**
-     * @return Collection<int, user>
+     * @return Collection<int, User>
      */
-    public function getUsser(): Collection
+    public function getUsers(): Collection
     {
-        return $this->usser;
+        return $this->users;
     }
 
-    public function addUsser(user $usser): static
+    public function addUser(User $user): static
     {
-        if (!$this->usser->contains($usser)) {
-            $this->usser->add($usser);
+        if (!$this->users->contains($user)) {
+            $this->users->add($user);
         }
 
         return $this;
     }
 
-    public function removeUsser(user $usser): static
+    public function removeUser(User $user): static
     {
-        $this->usser->removeElement($usser);
+        $this->users->removeElement($user);
 
         return $this;
     }
 
     /**
-     * @return Collection<int, conference>
+     * @return Collection<int, Conference>
      */
-    public function getConference(): Collection
+    public function getConferences(): Collection
     {
-        return $this->conference;
+        return $this->conferences;
     }
 
-    public function addConference(conference $conference): static
+    public function addConference(Conference $conference): static
     {
-        if (!$this->conference->contains($conference)) {
-            $this->conference->add($conference);
+        if (!$this->conferences->contains($conference)) {
+            $this->conferences->add($conference);
         }
 
         return $this;
     }
 
-    public function removeConference(conference $conference): static
+    public function removeConference(Conference $conference): static
     {
-        $this->conference->removeElement($conference);
+        $this->conferences->removeElement($conference);
 
         return $this;
     }

@@ -39,7 +39,7 @@ class Venue
     /**
      * @var Collection<int, Room>
      */
-    #[ORM\ManyToMany(targetEntity: Room::class, mappedBy: 'venue')]
+    #[ORM\ManyToMany(targetEntity: Room::class, mappedBy: 'venues')]
     private Collection $rooms;
 
     public function __construct()

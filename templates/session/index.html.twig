@@ -1,20 +1,51 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello SessionController!{% endblock %}
+{% block title %}Sessions{% endblock %}
 
 {% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
+<div class="card">
+    <div class="actions">
+        <h1 style="margin: 0;">Sessions</h1>
+        <a class="btn" href="{{ path('app_session_new') }}">New Session</a>
+    </div>
 
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
-
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code>C:/Users/Gigabyte/Desktop/WebG301/conference_scheduler_fgw_hn/src/Controller/SessionController.php</code></li>
-        <li>Your template at <code>C:/Users/Gigabyte/Desktop/WebG301/conference_scheduler_fgw_hn/templates/session/index.html.twig</code></li>
-    </ul>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Conference</th>
+                <th>Time</th>
+                <th>Status</th>
+                <th>Speakers</th>
+                <th>Rooms</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for session in sessions %}
+            <tr>
+                <td>{{ session.id }}</td>
+                <td>{{ session.title }}</td>
+                <td>{{ session.conference ? session.conference.name : '-' }}</td>
+                <td>{{ session.startTime ? session.startTime|date('Y-m-d H:i') : '-' }} to {{ session.endTime ? session.endTime|date('Y-m-d H:i') : '-' }}</td>
+                <td>{{ session.status }}</td>
+                <td>{{ session.speakers|length }}</td>
+                <td>{{ session.rooms|length }}</td>
+                <td>
+                    <div class="actions">
+                        <a class="btn btn-secondary" href="{{ path('app_session_edit', {id: session.id}) }}">Edit</a>
+                        <form class="inline" method="post" action="{{ path('app_session_delete', {id: session.id}) }}" onsubmit="return confirm('Delete this session?');">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete_session_' ~ session.id) }}">
+                            <button class="btn btn-danger" type="submit">Delete</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+        {% else %}
+            <tr><td colspan="8">No sessions found.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
 </div>
 {% endblock %}

@@ -1,0 +1,17 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit Conference{% endblock %}
+
+{% block body %}
+<div class="card">
+    <h1>Edit Conference #{{ conference.id }}</h1>
+
+    {{ form_start(form) }}
+        {{ form_widget(form) }}
+        <div class="actions" style="margin-top: 12px;">
+            <button class="btn" type="submit">Update</button>
+            <a class="btn btn-secondary" href="{{ path('app_conference_index') }}">Back</a>
+        </div>
+    {{ form_end(form) }}
+</div>
+{% endblock %}

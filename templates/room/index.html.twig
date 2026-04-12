@@ -1,0 +1,49 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Rooms{% endblock %}
+
+{% block body %}
+<div class="card">
+    <div class="actions">
+        <h1 style="margin: 0;">Rooms</h1>
+        <a class="btn" href="{{ path('app_room_new') }}">New Room</a>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Building</th>
+                <th>Floor</th>
+                <th>Capacity</th>
+                <th>Venues</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for room in rooms %}
+            <tr>
+                <td>{{ room.id }}</td>
+                <td>{{ room.name }}</td>
+                <td>{{ room.building }}</td>
+                <td>{{ room.floor }}</td>
+                <td>{{ room.capacity }}</td>
+                <td>{{ room.venues|length }}</td>
+                <td>
+                    <div class="actions">
+                        <a class="btn btn-secondary" href="{{ path('app_room_edit', {id: room.id}) }}">Edit</a>
+                        <form class="inline" method="post" action="{{ path('app_room_delete', {id: room.id}) }}" onsubmit="return confirm('Delete this room?');">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete_room_' ~ room.id) }}">
+                            <button class="btn btn-danger" type="submit">Delete</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+        {% else %}
+            <tr><td colspan="7">No rooms found.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

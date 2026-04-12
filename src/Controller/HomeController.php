@@ -2,17 +2,41 @@
 
 namespace App\Controller;
 
+use App\Repository\ConferenceRepository;
+use App\Repository\RegistrationRepository;
+use App\Repository\RoomRepository;
+use App\Repository\SessionRepository;
+use App\Repository\SpeakerRepository;
+use App\Repository\UserRepository;
+use App\Repository\VenueRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 final class HomeController extends AbstractController
 {
-    #[Route('/home', name: 'app_home')]
-    public function index(): Response
+    #[Route('/', name: 'app_home')]
+    #[Route('/home', name: 'app_home_alias')]
+    public function index(
+        ConferenceRepository $conferenceRepository,
+        SessionRepository $sessionRepository,
+        SpeakerRepository $speakerRepository,
+        VenueRepository $venueRepository,
+        RoomRepository $roomRepository,
+        RegistrationRepository $registrationRepository,
+        UserRepository $userRepository,
+    ): Response
     {
         return $this->render('home/index.html.twig', [
-            'controller_name' => 'HomeController',
+            'counts' => [
+                'conferences' => $conferenceRepository->count([]),
+                'sessions' => $sessionRepository->count([]),
+                'speakers' => $speakerRepository->count([]),
+                'venues' => $venueRepository->count([]),
+                'rooms' => $roomRepository->count([]),
+                'registrations' => $registrationRepository->count([]),
+                'users' => $userRepository->count([]),
+            ],
         ]);
     }
 }

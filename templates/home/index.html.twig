@@ -1,20 +1,20 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello HomeController!{% endblock %}
+{% block title %}Dashboard{% endblock %}
 
 {% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
+<div class="card">
+    <h1>Conference Scheduler Dashboard</h1>
+    <p>Use the navigation above to manage the entire conference workflow.</p>
+</div>
 
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
-
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code>C:/Users/Gigabyte/Desktop/WebG301/conference_scheduler_fgw_hn/src/Controller/HomeController.php</code></li>
-        <li>Your template at <code>C:/Users/Gigabyte/Desktop/WebG301/conference_scheduler_fgw_hn/templates/home/index.html.twig</code></li>
-    </ul>
+<div class="grid">
+    <div class="metric"><div class="label">Conferences</div><div class="value">{{ counts.conferences }}</div></div>
+    <div class="metric"><div class="label">Sessions</div><div class="value">{{ counts.sessions }}</div></div>
+    <div class="metric"><div class="label">Speakers</div><div class="value">{{ counts.speakers }}</div></div>
+    <div class="metric"><div class="label">Venues</div><div class="value">{{ counts.venues }}</div></div>
+    <div class="metric"><div class="label">Rooms</div><div class="value">{{ counts.rooms }}</div></div>
+    <div class="metric"><div class="label">Registrations</div><div class="value">{{ counts.registrations }}</div></div>
+    <div class="metric"><div class="label">Users</div><div class="value">{{ counts.users }}</div></div>
 </div>
 {% endblock %}

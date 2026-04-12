@@ -3,7 +3,6 @@
 namespace App\Entity;
 
 use App\Repository\SpeakerRepository;
-use BcMath\Number;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
@@ -33,8 +32,8 @@ class Speaker
     private ?string $bio = null;
 
     #[ORM\OneToOne(cascade: ['persist', 'remove'])]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?User $usser = null;
+    #[ORM\JoinColumn(name: 'usser_id', referencedColumnName: 'id', nullable: false)]
+    private ?User $user = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $expertise = null;
@@ -48,7 +47,7 @@ class Speaker
     /**
      * @var Collection<int, Session>
      */
-    #[ORM\ManyToMany(targetEntity: Session::class, mappedBy: 'speaker')]
+    #[ORM\ManyToMany(targetEntity: Session::class, mappedBy: 'speakers')]
     private Collection $sessions;
 
     public function __construct()
@@ -121,14 +120,14 @@ class Speaker
         return $this;
     }
 
-    public function getUsser(): ?User
+    public function getUser(): ?User
     {
-        return $this->usser;
+        return $this->user;
     }
 
-    public function setUsser(User $usser): static
+    public function setUser(User $user): static
     {
-        $this->usser = $usser;
+        $this->user = $user;
 
         return $this;
     }

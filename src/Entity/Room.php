@@ -27,14 +27,14 @@ class Room
     /**
      * @var Collection<int, Session>
      */
-    #[ORM\ManyToMany(targetEntity: Session::class, mappedBy: 'room')]
+    #[ORM\ManyToMany(targetEntity: Session::class, mappedBy: 'rooms')]
     private Collection $sessions;
 
     /**
-     * @var Collection<int, venue>
+     * @var Collection<int, Venue>
      */
-    #[ORM\ManyToMany(targetEntity: venue::class, inversedBy: 'rooms')]
-    private Collection $venue;
+    #[ORM\ManyToMany(targetEntity: Venue::class, inversedBy: 'rooms')]
+    private Collection $venues;
 
     #[ORM\Column(length: 50)]
     private ?string $floor = null;
@@ -45,7 +45,7 @@ class Room
     public function __construct()
     {
         $this->sessions = new ArrayCollection();
-        $this->venue = new ArrayCollection();
+        $this->venues = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -117,25 +117,25 @@ class Room
     }
 
     /**
-     * @return Collection<int, venue>
+     * @return Collection<int, Venue>
      */
-    public function getVenue(): Collection
+    public function getVenues(): Collection
     {
-        return $this->venue;
+        return $this->venues;
     }
 
-    public function addVenue(venue $venue): static
+    public function addVenue(Venue $venue): static
     {
-        if (!$this->venue->contains($venue)) {
-            $this->venue->add($venue);
+        if (!$this->venues->contains($venue)) {
+            $this->venues->add($venue);
         }
 
         return $this;
     }
 
-    public function removeVenue(venue $venue): static
+    public function removeVenue(Venue $venue): static
     {
-        $this->venue->removeElement($venue);
+        $this->venues->removeElement($venue);
 
         return $this;
     }

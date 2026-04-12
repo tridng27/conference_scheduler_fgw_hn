@@ -1,20 +1,49 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello RegistrationController!{% endblock %}
+{% block title %}Registrations{% endblock %}
 
 {% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
+<div class="card">
+    <div class="actions">
+        <h1 style="margin: 0;">Registrations</h1>
+        <a class="btn" href="{{ path('app_registration_new') }}">New Registration</a>
+    </div>
 
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
-
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code>C:/Users/Gigabyte/Desktop/WebG301/conference_scheduler_fgw_hn/src/Controller/RegistrationController.php</code></li>
-        <li>Your template at <code>C:/Users/Gigabyte/Desktop/WebG301/conference_scheduler_fgw_hn/templates/registration/index.html.twig</code></li>
-    </ul>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Ticket</th>
+                <th>Users</th>
+                <th>Conferences</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for registration in registrations %}
+            <tr>
+                <td>{{ registration.id }}</td>
+                <td>{{ registration.registrationDate ? registration.registrationDate|date('Y-m-d H:i') : '-' }}</td>
+                <td>{{ registration.status }}</td>
+                <td>{{ registration.ticketType ?? '-' }}</td>
+                <td>{{ registration.users|length }}</td>
+                <td>{{ registration.conferences|length }}</td>
+                <td>
+                    <div class="actions">
+                        <a class="btn btn-secondary" href="{{ path('app_registration_edit', {id: registration.id}) }}">Edit</a>
+                        <form class="inline" method="post" action="{{ path('app_registration_delete', {id: registration.id}) }}" onsubmit="return confirm('Delete this registration?');">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete_registration_' ~ registration.id) }}">
+                            <button class="btn btn-danger" type="submit">Delete</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+        {% else %}
+            <tr><td colspan="7">No registrations found.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
 </div>
 {% endblock %}
