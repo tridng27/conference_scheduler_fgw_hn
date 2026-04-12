@@ -6,7 +6,9 @@
 <div class="card">
     <div class="actions">
         <h1 style="margin: 0;">Conferences</h1>
-        <a class="btn" href="{{ path('app_conference_new') }}">New Conference</a>
+        {% if is_granted('ROLE_ADMIN') %}
+            <a class="btn" href="{{ path('app_conference_new') }}">New Conference</a>
+        {% endif %}
     </div>
 
     <table>
@@ -33,13 +35,17 @@
                 <td>{{ conference.maxAttendees }}</td>
                 <td>{{ conference.active ? 'Yes' : 'No' }}</td>
                 <td>
-                    <div class="actions">
-                        <a class="btn btn-secondary" href="{{ path('app_conference_edit', {id: conference.id}) }}">Edit</a>
-                        <form class="inline" method="post" action="{{ path('app_conference_delete', {id: conference.id}) }}" onsubmit="return confirm('Delete this conference?');">
-                            <input type="hidden" name="_token" value="{{ csrf_token('delete_conference_' ~ conference.id) }}">
-                            <button class="btn btn-danger" type="submit">Delete</button>
-                        </form>
-                    </div>
+                    {% if is_granted('ROLE_ADMIN') %}
+                        <div class="actions">
+                            <a class="btn btn-secondary" href="{{ path('app_conference_edit', {id: conference.id}) }}">Edit</a>
+                            <form class="inline" method="post" action="{{ path('app_conference_delete', {id: conference.id}) }}" onsubmit="return confirm('Delete this conference?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete_conference_' ~ conference.id) }}">
+                                <button class="btn btn-danger" type="submit">Delete</button>
+                            </form>
+                        </div>
+                    {% else %}
+                        <span style="color: var(--muted);">View only</span>
+                    {% endif %}
                 </td>
             </tr>
         {% else %}

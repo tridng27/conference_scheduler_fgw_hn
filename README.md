@@ -45,6 +45,9 @@ Then open: `http://127.0.0.1:8000/`
 
 - `/` Dashboard
 - `/admin` Admin summary
+- `/login` Login
+- `/register` Create account
+- `/profile` User self-profile
 - `/conference` Conference CRUD
 - `/session` Session CRUD
 - `/speaker` Speaker CRUD
@@ -52,6 +55,18 @@ Then open: `http://127.0.0.1:8000/`
 - `/room` Room CRUD
 - `/registration` Registration CRUD
 - `/user` User CRUD
+
+## Role Permissions
+
+- Registered users (`ROLE_USER`) can log in and view all modules.
+- Registered users cannot create, edit, or delete records.
+- Only admin (`ROLE_ADMIN`) can perform CRUD actions.
+
+## Default Admin Account
+
+Seeded via migration:
+- Email: `Admin@gmail.com`
+- Password: `admin@123`
 
 ## Validation Commands
 

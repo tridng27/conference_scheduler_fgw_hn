@@ -6,7 +6,9 @@
 <div class="card">
     <div class="actions">
         <h1 style="margin: 0;">Rooms</h1>
-        <a class="btn" href="{{ path('app_room_new') }}">New Room</a>
+        {% if is_granted('ROLE_ADMIN') %}
+            <a class="btn" href="{{ path('app_room_new') }}">New Room</a>
+        {% endif %}
     </div>
 
     <table>
@@ -31,13 +33,17 @@
                 <td>{{ room.capacity }}</td>
                 <td>{{ room.venues|length }}</td>
                 <td>
-                    <div class="actions">
-                        <a class="btn btn-secondary" href="{{ path('app_room_edit', {id: room.id}) }}">Edit</a>
-                        <form class="inline" method="post" action="{{ path('app_room_delete', {id: room.id}) }}" onsubmit="return confirm('Delete this room?');">
-                            <input type="hidden" name="_token" value="{{ csrf_token('delete_room_' ~ room.id) }}">
-                            <button class="btn btn-danger" type="submit">Delete</button>
-                        </form>
-                    </div>
+                    {% if is_granted('ROLE_ADMIN') %}
+                        <div class="actions">
+                            <a class="btn btn-secondary" href="{{ path('app_room_edit', {id: room.id}) }}">Edit</a>
+                            <form class="inline" method="post" action="{{ path('app_room_delete', {id: room.id}) }}" onsubmit="return confirm('Delete this room?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete_room_' ~ room.id) }}">
+                                <button class="btn btn-danger" type="submit">Delete</button>
+                            </form>
+                        </div>
+                    {% else %}
+                        <span style="color: var(--muted);">View only</span>
+                    {% endif %}
                 </td>
             </tr>
         {% else %}

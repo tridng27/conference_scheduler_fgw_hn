@@ -1,0 +1,18 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}My Profile{% endblock %}
+
+{% block body %}
+<div class="card auth-card">
+    <h1>My Profile</h1>
+    <p style="color: var(--muted); margin-top: 0;">You can update your personal details here.</p>
+
+    {{ form_start(form) }}
+        {{ form_widget(form) }}
+        <div class="actions" style="margin-top: 10px;">
+            <button class="btn" type="submit">Save changes</button>
+            <a class="btn btn-secondary" href="{{ path('app_home') }}">Back</a>
+        </div>
+    {{ form_end(form) }}
+</div>
+{% endblock %}

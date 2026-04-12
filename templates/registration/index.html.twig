@@ -6,7 +6,9 @@
 <div class="card">
     <div class="actions">
         <h1 style="margin: 0;">Registrations</h1>
-        <a class="btn" href="{{ path('app_registration_new') }}">New Registration</a>
+        {% if is_granted('ROLE_ADMIN') %}
+            <a class="btn" href="{{ path('app_registration_new') }}">New Registration</a>
+        {% endif %}
     </div>
 
     <table>
@@ -31,13 +33,17 @@
                 <td>{{ registration.users|length }}</td>
                 <td>{{ registration.conferences|length }}</td>
                 <td>
-                    <div class="actions">
-                        <a class="btn btn-secondary" href="{{ path('app_registration_edit', {id: registration.id}) }}">Edit</a>
-                        <form class="inline" method="post" action="{{ path('app_registration_delete', {id: registration.id}) }}" onsubmit="return confirm('Delete this registration?');">
-                            <input type="hidden" name="_token" value="{{ csrf_token('delete_registration_' ~ registration.id) }}">
-                            <button class="btn btn-danger" type="submit">Delete</button>
-                        </form>
-                    </div>
+                    {% if is_granted('ROLE_ADMIN') %}
+                        <div class="actions">
+                            <a class="btn btn-secondary" href="{{ path('app_registration_edit', {id: registration.id}) }}">Edit</a>
+                            <form class="inline" method="post" action="{{ path('app_registration_delete', {id: registration.id}) }}" onsubmit="return confirm('Delete this registration?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete_registration_' ~ registration.id) }}">
+                                <button class="btn btn-danger" type="submit">Delete</button>
+                            </form>
+                        </div>
+                    {% else %}
+                        <span style="color: var(--muted);">View only</span>
+                    {% endif %}
                 </td>
             </tr>
         {% else %}

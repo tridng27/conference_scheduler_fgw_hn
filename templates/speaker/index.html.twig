@@ -6,7 +6,9 @@
 <div class="card">
     <div class="actions">
         <h1 style="margin: 0;">Speakers</h1>
-        <a class="btn" href="{{ path('app_speaker_new') }}">New Speaker</a>
+        {% if is_granted('ROLE_ADMIN') %}
+            <a class="btn" href="{{ path('app_speaker_new') }}">New Speaker</a>
+        {% endif %}
     </div>
 
     <table>
@@ -31,13 +33,17 @@
                 <td>{{ speaker.user ? speaker.user.email : '-' }}</td>
                 <td>{{ speaker.sessions|length }}</td>
                 <td>
-                    <div class="actions">
-                        <a class="btn btn-secondary" href="{{ path('app_speaker_edit', {id: speaker.id}) }}">Edit</a>
-                        <form class="inline" method="post" action="{{ path('app_speaker_delete', {id: speaker.id}) }}" onsubmit="return confirm('Delete this speaker?');">
-                            <input type="hidden" name="_token" value="{{ csrf_token('delete_speaker_' ~ speaker.id) }}">
-                            <button class="btn btn-danger" type="submit">Delete</button>
-                        </form>
-                    </div>
+                    {% if is_granted('ROLE_ADMIN') %}
+                        <div class="actions">
+                            <a class="btn btn-secondary" href="{{ path('app_speaker_edit', {id: speaker.id}) }}">Edit</a>
+                            <form class="inline" method="post" action="{{ path('app_speaker_delete', {id: speaker.id}) }}" onsubmit="return confirm('Delete this speaker?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete_speaker_' ~ speaker.id) }}">
+                                <button class="btn btn-danger" type="submit">Delete</button>
+                            </form>
+                        </div>
+                    {% else %}
+                        <span style="color: var(--muted);">View only</span>
+                    {% endif %}
                 </td>
             </tr>
         {% else %}

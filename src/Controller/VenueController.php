@@ -10,6 +10,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/venue')]
 final class VenueController extends AbstractController
@@ -23,6 +24,7 @@ final class VenueController extends AbstractController
     }
 
     #[Route('/new', name: 'app_venue_new', methods: ['GET', 'POST'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $venue = new Venue();
@@ -45,6 +47,7 @@ final class VenueController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'app_venue_edit', methods: ['GET', 'POST'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function edit(Request $request, Venue $venue, EntityManagerInterface $entityManager): Response
     {
         $form = $this->createForm(VenueType::class, $venue);
@@ -64,6 +67,7 @@ final class VenueController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_venue_delete', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function delete(Request $request, Venue $venue, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete_venue_'.$venue->getId(), (string) $request->request->get('_token'))) {

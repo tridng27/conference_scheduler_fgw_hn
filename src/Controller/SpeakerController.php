@@ -10,6 +10,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/speaker')]
 final class SpeakerController extends AbstractController
@@ -23,6 +24,7 @@ final class SpeakerController extends AbstractController
     }
 
     #[Route('/new', name: 'app_speaker_new', methods: ['GET', 'POST'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $speaker = new Speaker();
@@ -45,6 +47,7 @@ final class SpeakerController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'app_speaker_edit', methods: ['GET', 'POST'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function edit(Request $request, Speaker $speaker, EntityManagerInterface $entityManager): Response
     {
         $form = $this->createForm(SpeakerType::class, $speaker);
@@ -64,6 +67,7 @@ final class SpeakerController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_speaker_delete', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function delete(Request $request, Speaker $speaker, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete_speaker_'.$speaker->getId(), (string) $request->request->get('_token'))) {
