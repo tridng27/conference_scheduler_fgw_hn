@@ -69,6 +69,28 @@ Seeded via migration:
 - Email: `Admin@gmail.com`
 - Password: `admin@123`
 
+## Seed Test Data
+
+Use the built-in seed command to generate realistic data for all modules:
+
+```bash
+php bin/console app:seed:test-data --reset
+```
+
+What it creates:
+- 1 admin account
+- 8 normal users
+- 4 speaker accounts + speaker profiles
+- 3 venues + 6 rooms
+- 4 conferences (past, running, upcoming)
+- 8 sessions linked to speakers/rooms/conferences
+- 10 registrations across conferences
+
+Known login credentials:
+- Admin: `Admin@gmail.com` / `admin@123`
+- Normal user: `john.doe@example.com` / `user@123`
+- Speaker user: `alex.chen.speaker@example.com` / `speaker@123`
+
 ## Validation Commands
 
 ```bash
