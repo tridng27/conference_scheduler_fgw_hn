@@ -27,6 +27,9 @@ final class HomeController extends AbstractController
         UserRepository $userRepository,
     ): Response
     {
+        $todaySessions = $sessionRepository->findTodaySchedule();
+        $upcomingSessions = $sessionRepository->findUpcomingSessions(10);
+
         return $this->render('home/index.html.twig', [
             'counts' => [
                 'conferences' => $conferenceRepository->count([]),
@@ -37,6 +40,10 @@ final class HomeController extends AbstractController
                 'registrations' => $registrationRepository->count([]),
                 'users' => $userRepository->count([]),
             ],
+            'running_conferences' => $conferenceRepository->findRunningConferences(),
+            'upcoming_conferences' => $conferenceRepository->findUpcomingConferences(),
+            'today_sessions' => $todaySessions,
+            'upcoming_sessions' => $upcomingSessions,
         ]);
     }
 }

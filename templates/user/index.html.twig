@@ -1,15 +1,14 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Users{% endblock %}
+{% block title %}User Roles{% endblock %}
 
 {% block body %}
 <div class="card">
-    <div class="actions">
-        <h1 style="margin: 0;">Users</h1>
-        {% if is_granted('ROLE_ADMIN') %}
-            <a class="btn" href="{{ path('app_user_new') }}">New User</a>
-        {% endif %}
-    </div>
+    <h1 style="margin-top: 0;">User Role Management</h1>
+    <p style="color: var(--muted); margin-top: 4px;">
+        Registered accounts are created from the public registration page as <strong>ROLE_USER</strong>.
+        Promote or demote access here.
+    </p>
 
     <table>
         <thead>
@@ -18,36 +17,41 @@
                 <th>Email</th>
                 <th>Name</th>
                 <th>Roles</th>
-                <th>Role Label</th>
                 <th>Created</th>
                 <th>Actions</th>
             </tr>
         </thead>
         <tbody>
-        {% for user in users %}
+        {% for listedUser in users %}
+            {% set isAdmin = 'ROLE_ADMIN' in listedUser.roles %}
+            {% set isSelf = app.user and app.user.id == listedUser.id %}
             <tr>
-                <td>{{ user.id }}</td>
-                <td>{{ user.email }}</td>
-                <td>{{ user.firstName }} {{ user.lastName }}</td>
-                <td>{{ user.roles|join(', ') }}</td>
-                <td>{{ user.role }}</td>
-                <td>{{ user.createdAt ? user.createdAt|date('Y-m-d H:i') : '-' }}</td>
+                <td>{{ listedUser.id }}</td>
+                <td>{{ listedUser.email }}</td>
+                <td>{{ listedUser.firstName }} {{ listedUser.lastName }}</td>
+                <td>{{ listedUser.roles|join(', ') }}</td>
+                <td>{{ listedUser.createdAt ? listedUser.createdAt|date('Y-m-d H:i') : '-' }}</td>
                 <td>
-                    {% if is_granted('ROLE_ADMIN') %}
-                        <div class="actions">
-                            <a class="btn btn-secondary" href="{{ path('app_user_edit', {id: user.id}) }}">Edit</a>
-                            <form class="inline" method="post" action="{{ path('app_user_delete', {id: user.id}) }}" onsubmit="return confirm('Delete this user?');">
-                                <input type="hidden" name="_token" value="{{ csrf_token('delete_user_' ~ user.id) }}">
-                                <button class="btn btn-danger" type="submit">Delete</button>
+                    <div class="actions">
+                        {% if not isAdmin %}
+                            <form class="inline" method="post" action="{{ path('app_user_promote', {id: listedUser.id}) }}">
+                                <input type="hidden" name="_token" value="{{ csrf_token('promote_user_' ~ listedUser.id) }}">
+                                <button class="btn" type="submit">Promote to Admin</button>
                             </form>
-                        </div>
-                    {% else %}
-                        <span style="color: var(--muted);">View only</span>
-                    {% endif %}
+                        {% else %}
+                            <form class="inline" method="post" action="{{ path('app_user_demote', {id: listedUser.id}) }}" onsubmit="return confirm('Demote this admin to user?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('demote_user_' ~ listedUser.id) }}">
+                                <button class="btn btn-danger" type="submit" {% if isSelf and admin_count <= 1 %}disabled{% endif %}>Demote Admin</button>
+                            </form>
+                            {% if isSelf and admin_count <= 1 %}
+                                <span style="color: var(--muted);">Last admin cannot self-demote.</span>
+                            {% endif %}
+                        {% endif %}
+                    </div>
                 </td>
             </tr>
         {% else %}
-            <tr><td colspan="7">No users found.</td></tr>
+            <tr><td colspan="6">No users found.</td></tr>
         {% endfor %}
         </tbody>
     </table>

@@ -35,17 +35,16 @@
                 <td>{{ conference.maxAttendees }}</td>
                 <td>{{ conference.active ? 'Yes' : 'No' }}</td>
                 <td>
-                    {% if is_granted('ROLE_ADMIN') %}
-                        <div class="actions">
+                    <div class="actions">
+                        <a class="btn btn-secondary" href="{{ path('app_session_index', {conference: conference.id}) }}">View Schedule</a>
+                        {% if is_granted('ROLE_ADMIN') %}
                             <a class="btn btn-secondary" href="{{ path('app_conference_edit', {id: conference.id}) }}">Edit</a>
                             <form class="inline" method="post" action="{{ path('app_conference_delete', {id: conference.id}) }}" onsubmit="return confirm('Delete this conference?');">
                                 <input type="hidden" name="_token" value="{{ csrf_token('delete_conference_' ~ conference.id) }}">
                                 <button class="btn btn-danger" type="submit">Delete</button>
                             </form>
-                        </div>
-                    {% else %}
-                        <span style="color: var(--muted);">View only</span>
-                    {% endif %}
+                        {% endif %}
+                    </div>
                 </td>
             </tr>
         {% else %}

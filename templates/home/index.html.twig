@@ -1,11 +1,13 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Dashboard{% endblock %}
+{% block title %}Conference Scheduler Dashboard{% endblock %}
 
 {% block body %}
 <div class="card">
-    <h1>Conference Scheduler Dashboard</h1>
-    <p>Use the navigation above to manage the entire conference workflow.</p>
+    <h1 style="margin-top: 0;">Conference Scheduler Dashboard</h1>
+    <p style="color: var(--muted);">
+        Track live conferences, monitor today agenda, and plan upcoming sessions from one place.
+    </p>
 </div>
 
 <div class="grid">
@@ -15,6 +17,106 @@
     <div class="metric"><div class="label">Venues</div><div class="value">{{ counts.venues }}</div></div>
     <div class="metric"><div class="label">Rooms</div><div class="value">{{ counts.rooms }}</div></div>
     <div class="metric"><div class="label">Registrations</div><div class="value">{{ counts.registrations }}</div></div>
-    <div class="metric"><div class="label">Users</div><div class="value">{{ counts.users }}</div></div>
+</div>
+
+<div class="card">
+    <h2 style="margin-top: 0;">Active Conferences</h2>
+    {% if running_conferences is not empty %}
+        <ul>
+            {% for conference in running_conferences %}
+                <li>
+                    <strong>{{ conference.name }}</strong>
+                    ({{ conference.startDate ? conference.startDate|date('Y-m-d') : '-' }} to {{ conference.endDate ? conference.endDate|date('Y-m-d') : '-' }})
+                    - {{ conference.location }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p style="color: var(--muted);">No conference is currently running.</p>
+    {% endif %}
+</div>
+
+<div class="card">
+    <h2 style="margin-top: 0;">Today Agenda</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>Session</th>
+                <th>Conference</th>
+                <th>Room(s)</th>
+                <th>Speaker(s)</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for session in today_sessions %}
+            <tr>
+                <td>{{ session.startTime ? session.startTime|date('H:i') : '-' }} - {{ session.endTime ? session.endTime|date('H:i') : '-' }}</td>
+                <td>{{ session.title }}</td>
+                <td>{{ session.conference ? session.conference.name : '-' }}</td>
+                <td>
+                    {% for room in session.rooms %}
+                        {{ room.name }}{% if not loop.last %}, {% endif %}
+                    {% else %}
+                        -
+                    {% endfor %}
+                </td>
+                <td>
+                    {% for speaker in session.speakers %}
+                        {{ speaker.name }}{% if not loop.last %}, {% endif %}
+                    {% else %}
+                        -
+                    {% endfor %}
+                </td>
+            </tr>
+        {% else %}
+            <tr><td colspan="5">No sessions scheduled for today.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="card">
+    <div class="actions">
+        <h2 style="margin: 0;">Upcoming Sessions</h2>
+        <a class="btn btn-secondary" href="{{ path('app_session_index') }}">Open Full Schedule</a>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Date & Time</th>
+                <th>Session</th>
+                <th>Conference</th>
+                <th>Track</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for session in upcoming_sessions %}
+            <tr>
+                <td>{{ session.startTime ? session.startTime|date('Y-m-d H:i') : '-' }}</td>
+                <td>{{ session.title }}</td>
+                <td>{{ session.conference ? session.conference.name : '-' }}</td>
+                <td>{{ session.track ?? '-' }}</td>
+            </tr>
+        {% else %}
+            <tr><td colspan="4">No upcoming sessions available.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="card">
+    <h2 style="margin-top: 0;">Next Conferences</h2>
+    <ul>
+        {% for conference in upcoming_conferences %}
+            <li>
+                {{ conference.name }}
+                ({{ conference.startDate ? conference.startDate|date('Y-m-d') : '-' }})
+                - {{ conference.location }}
+            </li>
+        {% else %}
+            <li>No upcoming conferences.</li>
+        {% endfor %}
+    </ul>
 </div>
 {% endblock %}

@@ -7,26 +7,26 @@
         "php": ">=8.4",
         "ext-ctype": "*",
         "ext-iconv": "*",
-        "doctrine/dbal": "^4.4",
-        "doctrine/doctrine-bundle": "^3.2",
+        "amphp/http-client": "^5.3.4",
+        "doctrine/dbal": "^4.4.3",
+        "doctrine/doctrine-bundle": "^3.2.2",
         "doctrine/doctrine-migrations-bundle": "^4.0",
-        "doctrine/orm": "^3.6",
-        "phpdocumentor/reflection-docblock": "^6.0",
-        "phpstan/phpdoc-parser": "^2.3",
+        "doctrine/orm": "^3.6.3",
+        "phpdocumentor/reflection-docblock": "^6.0.3",
+        "phpstan/phpdoc-parser": "^2.3.2",
         "symfony/asset": "8.0.*",
         "symfony/asset-mapper": "8.0.*",
         "symfony/console": "8.0.*",
         "symfony/doctrine-messenger": "8.0.*",
         "symfony/dotenv": "8.0.*",
         "symfony/expression-language": "8.0.*",
-        "symfony/flex": "^2",
+        "symfony/flex": "^2.10",
         "symfony/form": "8.0.*",
         "symfony/framework-bundle": "8.0.*",
-        "symfony/http-client": "8.0.*",
         "symfony/intl": "8.0.*",
         "symfony/mailer": "8.0.*",
         "symfony/mime": "8.0.*",
-        "symfony/monolog-bundle": "^3.0|^4.0",
+        "symfony/monolog-bundle": "^3.0|^4.0.2",
         "symfony/notifier": "8.0.*",
         "symfony/process": "8.0.*",
         "symfony/property-access": "8.0.*",
@@ -34,17 +34,17 @@
         "symfony/runtime": "8.0.*",
         "symfony/security-bundle": "8.0.*",
         "symfony/serializer": "8.0.*",
-        "symfony/stimulus-bundle": "^2.34",
+        "symfony/stimulus-bundle": "^2.35",
         "symfony/string": "8.0.*",
         "symfony/translation": "8.0.*",
         "symfony/twig-bundle": "8.0.*",
-        "symfony/ux-turbo": "^2.34",
+        "symfony/ux-turbo": "^2.35",
         "symfony/validator": "8.0.*",
         "symfony/web-link": "8.0.*",
         "symfony/webpack-encore-bundle": "^2.4",
         "symfony/yaml": "8.0.*",
-        "twig/extra-bundle": "^2.12|^3.0",
-        "twig/twig": "^2.12|^3.0"
+        "twig/extra-bundle": "^2.12|^3.24",
+        "twig/twig": "^2.12|^3.24"
     },
     "config": {
         "allow-plugins": {
@@ -53,7 +53,8 @@
             "symfony/runtime": true
         },
         "bump-after-update": true,
-        "sort-packages": true
+        "sort-packages": true,
+        "process-timeout": 0
     },
     "autoload": {
         "psr-4": {
@@ -78,7 +79,8 @@
         "symfony/polyfill-php84": "*"
     },
     "scripts": {
-        "serve": "php -S 127.0.0.1:8000 -t public public/index.php",
+        "serve": "php bin/console cache:warmup && php -c .php-dev.ini -S 127.0.0.1:8000 -t public public/index.php",
+        "serve:prod": "set APP_ENV=prod&& set APP_DEBUG=0&& php -c .php-dev.ini -S 127.0.0.1:8000 -t public public/index.php",
         "auto-scripts": {
             "cache:clear": "symfony-cmd",
             "assets:install %PUBLIC_DIR%": "symfony-cmd",
@@ -102,7 +104,7 @@
         }
     },
     "require-dev": {
-        "phpunit/phpunit": "^13.1",
+        "phpunit/phpunit": "^13.1.7",
         "symfony/browser-kit": "8.0.*",
         "symfony/css-selector": "8.0.*",
         "symfony/debug-bundle": "8.0.*",

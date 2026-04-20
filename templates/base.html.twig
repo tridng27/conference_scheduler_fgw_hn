@@ -200,16 +200,15 @@
             <div class="nav-links">
                 {% if app.user %}
                     <a href="{{ path('app_home') }}">Dashboard</a>
-                    {% if is_granted('ROLE_ADMIN') %}
-                        <a href="{{ path('app_admin') }}">Admin</a>
-                    {% endif %}
                     <a href="{{ path('app_conference_index') }}">Conferences</a>
                     <a href="{{ path('app_session_index') }}">Sessions</a>
                     <a href="{{ path('app_speaker_index') }}">Speakers</a>
                     <a href="{{ path('app_venue_index') }}">Venues</a>
                     <a href="{{ path('app_room_index') }}">Rooms</a>
                     <a href="{{ path('app_registration_index') }}">Registrations</a>
-                    <a href="{{ path('app_user_index') }}">Users</a>
+                    {% if is_granted('ROLE_ADMIN') %}
+                        <a href="{{ path('app_user_index') }}">Users</a>
+                    {% endif %}
                 {% endif %}
             </div>
             <div class="auth-links">

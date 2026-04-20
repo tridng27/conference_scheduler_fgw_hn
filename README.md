@@ -36,7 +36,7 @@ php bin/console doctrine:migrations:migrate
 
 4. Start server:
 ```bash
-php -S 127.0.0.1:8000 -t public
+composer serve
 ```
 
 Then open: `http://127.0.0.1:8000/`
@@ -44,23 +44,24 @@ Then open: `http://127.0.0.1:8000/`
 ## Main Routes
 
 - `/` Dashboard
-- `/admin` Admin summary
 - `/login` Login
 - `/register` Create account
 - `/profile` User self-profile
 - `/conference` Conference CRUD
-- `/session` Session CRUD
+- `/session` Session schedule + CRUD
 - `/speaker` Speaker CRUD
 - `/venue` Venue CRUD
 - `/room` Room CRUD
 - `/registration` Registration CRUD
-- `/user` User CRUD
+- `/user` User role management (admin only)
 
 ## Role Permissions
 
-- Registered users (`ROLE_USER`) can log in and view all modules.
-- Registered users cannot create, edit, or delete records.
-- Only admin (`ROLE_ADMIN`) can perform CRUD actions.
+- Public registration creates only `ROLE_USER` accounts.
+- Users can view conference data and edit their own profile.
+- User management page is accessible only by `ROLE_ADMIN`.
+- Admins can promote users to admin and demote admins back to users.
+- The system always keeps at least one admin account.
 
 ## Default Admin Account
 
@@ -77,7 +78,15 @@ php bin/console doctrine:schema:validate
 php bin/phpunit
 ```
 
+## Performance Note (Dev)
+
+This project includes `.php-dev.ini` and the `composer serve` script enables:
+- `opcache.enable_cli=1`
+- larger `realpath_cache`
+
+This avoids very slow Symfony bootstrap times on Windows when using `php -S`.
+
 ## Notes
 
-- Passwords are hashed via Symfony `UserPasswordHasherInterface` in user create/edit flows.
+- Passwords are hashed via Symfony `UserPasswordHasherInterface`.
 - Current test suite has no test cases yet (`No tests executed!`).

@@ -43,7 +43,7 @@ class SessionType extends AbstractType
                 'class' => Conference::class,
                 'choice_label' => 'name',
                 'placeholder' => 'Choose conference',
-                'required' => false,
+                'required' => true,
             ])
             ->add('speakers', EntityType::class, [
                 'class' => Speaker::class,
