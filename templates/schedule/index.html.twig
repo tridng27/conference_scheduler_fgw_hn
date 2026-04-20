@@ -35,19 +35,20 @@
                     </div>
                 </div>
 
-                {# Group sessions by date #}
-                {% set sessionsByDate = {} %}
+                {# Group sessions by date using a simpler approach #}
+                {% set dateGroups = {} %}
                 {% for session in sessions %}
                     {% set dateKey = session.startTime|date('Y-m-d') %}
-                    {% if not sessionsByDate[dateKey] %}
-                        {% set sessionsByDate = sessionsByDate|merge({(dateKey): []}) %}
+                    {% if dateGroups[dateKey] is not defined %}
+                        {% set dateGroups = dateGroups|merge({(dateKey): []}) %}
                     {% endif %}
-                    {% set sessionsByDate = sessionsByDate|merge({(dateKey): sessionsByDate[dateKey]|merge([session])}) %}
+                    {% set dateGroups = dateGroups|merge({(dateKey): (dateGroups[dateKey] ?? [])|merge([session])}) %}
                 {% endfor %}
 
                 {# Display schedule by date #}
                 <div style="margin-top: 16px;">
-                    {% for dateKey, dateSessions in sessionsByDate|sort %}
+                    {% for dateKey in dateGroups|keys|sort %}
+                        {% set dateSessions = dateGroups[dateKey] %}
                         <div style="margin-bottom: 20px;">
                             <h3 style="margin: 0 0 12px 0; padding: 8px 12px; background: #f0f7ff; border-left: 4px solid #0b4f6c; border-radius: 4px; color: #0b4f6c; font-size: 14px;">
                                 📆 {{ dateKey|date('l, F j, Y') }}
