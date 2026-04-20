@@ -1,0 +1,159 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Weekly Schedule - Conference Scheduler{% endblock %}
+
+{% block body %}
+    <h1>📅 Weekly Schedule</h1>
+    
+    {% if not scheduleData %}
+        <div class="card">
+            <p style="color: #999; text-align: center;">No conferences scheduled yet.</p>
+        </div>
+    {% else %}
+        {% for conferenceId, data in scheduleData %}
+            {% set conference = data.conference %}
+            {% set sessions = data.sessions %}
+            
+            <div class="card schedule-card">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+                    <div>
+                        <h2 style="margin: 0 0 8px 0; color: #0b4f6c;">{{ conference.name }}</h2>
+                        <p style="margin: 0; color: #666; font-size: 14px;">
+                            <strong>📍 Location:</strong> {{ conference.location }} 
+                            <strong style="margin-left: 16px;">📌 Status:</strong> 
+                            <span style="display: inline-block; padding: 3px 8px; border-radius: 4px; background: {% if conference.status == 'UPCOMING' %}#dbeafe{% elseif conference.status == 'ONGOING' %}#fef3c7{% else %}#dbeafe{% endif %}; color: {% if conference.status == 'UPCOMING' %}#0369a1{% elseif conference.status == 'ONGOING' %}#92400e{% else %}#0369a1{% endif %}; font-size: 12px;">
+                                {{ conference.status }}
+                            </span>
+                        </p>
+                        <p style="margin: 8px 0 0 0; color: #666; font-size: 13px;">
+                            📅 {{ conference.startDate|date('M d, Y') }} - {{ conference.endDate|date('M d, Y') }}
+                        </p>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 24px; font-weight: 700; color: #0b4f6c;">{{ sessions|length }}</div>
+                        <div style="font-size: 12px; color: #666;">Sessions</div>
+                    </div>
+                </div>
+
+                {# Group sessions by date #}
+                {% set sessionsByDate = {} %}
+                {% for session in sessions %}
+                    {% set dateKey = session.startTime|date('Y-m-d') %}
+                    {% if not sessionsByDate[dateKey] %}
+                        {% set sessionsByDate = sessionsByDate|merge({(dateKey): []}) %}
+                    {% endif %}
+                    {% set sessionsByDate = sessionsByDate|merge({(dateKey): sessionsByDate[dateKey]|merge([session])}) %}
+                {% endfor %}
+
+                {# Display schedule by date #}
+                <div style="margin-top: 16px;">
+                    {% for dateKey, dateSessions in sessionsByDate|sort %}
+                        <div style="margin-bottom: 20px;">
+                            <h3 style="margin: 0 0 12px 0; padding: 8px 12px; background: #f0f7ff; border-left: 4px solid #0b4f6c; border-radius: 4px; color: #0b4f6c; font-size: 14px;">
+                                📆 {{ dateKey|date('l, F j, Y') }}
+                            </h3>
+                            
+                            <div style="overflow-x: auto;">
+                                <table style="margin: 0; width: 100%;">
+                                    <thead>
+                                        <tr style="background: #f8fafc;">
+                                            <th style="width: 120px; text-align: center;">⏰ Time</th>
+                                            <th>📝 Session</th>
+                                            <th style="width: 150px;">👥 Speakers</th>
+                                            <th style="width: 100px; text-align: center;">Attendees</th>
+                                            <th style="width: 80px; text-align: center;">Type</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for session in dateSessions|sort((a, b) => a.startTime <=> b.startTime) %}
+                                            <tr style="border-bottom: 1px solid #e5e7eb; transition: background 0.2s;">
+                                                <td style="text-align: center; font-weight: 600; color: #0b4f6c;">
+                                                    <div>{{ session.startTime|date('H:i') }}</div>
+                                                    <div style="font-size: 11px; color: #999;">→ {{ session.endTime|date('H:i') }}</div>
+                                                </td>
+                                                <td>
+                                                    <div style="font-weight: 600; color: #1f2937; margin-bottom: 4px;">{{ session.title }}</div>
+                                                    {% if session.description %}
+                                                        <div style="font-size: 13px; color: #666;">{{ session.description }}</div>
+                                                    {% endif %}
+                                                </td>
+                                                <td style="font-size: 13px;">
+                                                    {% if session.speakers|length > 0 %}
+                                                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                                                            {% for speaker in session.speakers|slice(0, 2) %}
+                                                                <div style="padding: 3px 6px; background: #eef7ff; border-radius: 4px; border-left: 2px solid #0b4f6c; color: #0b4f6c; font-size: 12px;">
+                                                                    🗣️ {{ speaker.user.firstName }} {{ speaker.user.lastName }}
+                                                                </div>
+                                                            {% endfor %}
+                                                            {% if session.speakers|length > 2 %}
+                                                                <div style="font-size: 11px; color: #666; margin-top: 2px; font-style: italic;">
+                                                                    +{{ session.speakers|length - 2 }} more
+                                                                </div>
+                                                            {% endif %}
+                                                        </div>
+                                                    {% else %}
+                                                        <span style="color: #999; font-size: 12px;">No speakers assigned</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td style="text-align: center;">
+                                                    {% if session.maxAttendees %}
+                                                        <div style="font-weight: 600; color: #0b4f6c;">{{ session.maxAttendees }}</div>
+                                                    {% else %}
+                                                        <span style="color: #999; font-size: 12px;">Unlimited</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td style="text-align: center;">
+                                                    <span style="display: inline-block; padding: 4px 8px; border-radius: 4px; background: #f0fdf4; color: #166534; font-size: 12px; font-weight: 600; border: 1px solid #bbf7d0;">
+                                                        {{ session.sessionType ?? 'PRESENTATION' }}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                {# Summary stats #}
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-top: 16px; padding-top: 16px; border-top: 1px solid #e5e7eb;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 20px; font-weight: 700; color: #0b4f6c;">{{ sessions|length }}</div>
+                        <div style="font-size: 12px; color: #666;">Total Sessions</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 20px; font-weight: 700; color: #0b4f6c;">
+                            {% set speakers = sessions|reduce((carry, session) => carry + session.speakers|length, 0) %}
+                            {{ speakers }}
+                        </div>
+                        <div style="font-size: 12px; color: #666;">Speakers</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 20px; font-weight: 700; color: #0b4f6c;">{{ conference.maxAttendees }}</div>
+                        <div style="font-size: 12px; color: #666;">Max Capacity</div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <style>
+        .schedule-card {
+            border: 2px solid #e5e7eb;
+            background: linear-gradient(150deg, #ffffff 0%, #fafbfc 100%);
+        }
+        .schedule-card:hover {
+            box-shadow: 0 12px 32px rgba(8, 52, 74, 0.12);
+            border-color: #0b4f6c;
+        }
+        @media (max-width: 768px) {
+            table {
+                font-size: 12px !important;
+            }
+            th, td {
+                padding: 8px !important;
+            }
+        }
+    </style>
+{% endblock %}
