@@ -3,92 +3,240 @@
 {% block title %}Session Schedule{% endblock %}
 
 {% block body %}
-<div class="card">
-    <div class="actions">
-        <h1 style="margin: 0;">Conference Session Schedule</h1>
-        {% if is_granted('ROLE_ADMIN') %}
-            <a class="btn" href="{{ path('app_session_new') }}">Create Session</a>
-        {% endif %}
-    </div>
+<style>
+    .session-shell {
+        display: grid;
+        gap: 16px;
+    }
+    .session-hero {
+        border-radius: 18px;
+        padding: 20px;
+        color: #fff;
+        background:
+            radial-gradient(circle at 88% 10%, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0) 28%),
+            linear-gradient(135deg, #2b3246 0%, #1f516f 52%, #198e9b 100%);
+        box-shadow: 0 14px 36px rgba(31, 81, 111, 0.28);
+    }
+    .session-hero h1 {
+        margin: 0;
+        font-size: clamp(1.4rem, 2.5vw, 1.95rem);
+        letter-spacing: 0.02em;
+    }
+    .session-hero p {
+        margin: 8px 0 14px;
+        color: rgba(236, 248, 255, 0.9);
+    }
+    .session-stats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 9px;
+    }
+    .session-stat {
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.28);
+        background: rgba(255, 255, 255, 0.13);
+        padding: 7px 11px;
+        font-size: 12px;
+    }
+    .filter-panel {
+        border: 1px solid #c8d7e4;
+        border-radius: 14px;
+        background: linear-gradient(180deg, #ffffff 0%, #f6fbff 100%);
+        padding: 14px;
+    }
+    .filter-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 10px;
+        align-items: end;
+    }
+    .session-list {
+        display: grid;
+        gap: 12px;
+    }
+    .session-card {
+        border: 1px solid #c8d7e4;
+        border-radius: 14px;
+        background: #fff;
+        box-shadow: 0 7px 20px rgba(11, 79, 108, 0.08);
+        padding: 14px;
+        display: grid;
+        gap: 12px;
+    }
+    .session-row {
+        display: grid;
+        grid-template-columns: 180px 1fr;
+        gap: 14px;
+    }
+    .session-time {
+        border-radius: 10px;
+        border: 1px solid #dbeafe;
+        background: #eef6ff;
+        color: #1e3a8a;
+        padding: 10px;
+        font-size: 13px;
+        font-weight: 700;
+        line-height: 1.5;
+    }
+    .session-title {
+        margin: 0 0 4px;
+        color: #0f3f58;
+        font-size: 18px;
+    }
+    .session-subtitle {
+        color: #475569;
+        font-size: 13px;
+        margin-bottom: 8px;
+    }
+    .session-tags {
+        display: flex;
+        gap: 7px;
+        flex-wrap: wrap;
+    }
+    .session-tag {
+        font-size: 12px;
+        color: #1f4e69;
+        border-radius: 999px;
+        border: 1px solid #b8d1e2;
+        background: #f2f8ff;
+        padding: 4px 9px;
+    }
+    .session-card footer {
+        border-top: 1px dashed #d5e2ee;
+        padding-top: 10px;
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    .session-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+    .empty-card {
+        text-align: center;
+        padding: 26px;
+    }
+    @media (max-width: 820px) {
+        .session-row {
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+    }
+</style>
 
-    <form method="get" class="actions" style="margin-top: 12px;">
-        <div style="min-width: 220px;">
-            <label for="conference-filter">Conference</label>
-            <select id="conference-filter" name="conference">
-                <option value="0">All conferences</option>
-                {% for conference in conferences %}
-                    <option value="{{ conference.id }}" {% if selected_conference == conference.id %}selected{% endif %}>
-                        {{ conference.name }}
-                    </option>
-                {% endfor %}
-            </select>
-        </div>
-        <div style="min-width: 220px;">
-            <label for="date-filter">Date</label>
-            <input id="date-filter" type="date" name="date" value="{{ selected_date }}">
-        </div>
-        <div class="actions" style="margin-top: 22px;">
-            <button class="btn" type="submit">Apply</button>
-            <a class="btn btn-secondary" href="{{ path('app_session_index') }}">Reset</a>
-        </div>
-    </form>
+{% set with_room_count = 0 %}
+{% set with_speaker_count = 0 %}
+{% for session in sessions %}
+    {% if session.rooms|length > 0 %}
+        {% set with_room_count = with_room_count + 1 %}
+    {% endif %}
+    {% if session.speakers|length > 0 %}
+        {% set with_speaker_count = with_speaker_count + 1 %}
+    {% endif %}
+{% endfor %}
 
-    <table>
-        <thead>
-            <tr>
-                <th>Time</th>
-                <th>Session</th>
-                <th>Conference</th>
-                <th>Room(s)</th>
-                <th>Speaker(s)</th>
-                <th>Track</th>
-                <th>Status</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for session in sessions %}
-            <tr>
-                <td>{{ session.startTime ? session.startTime|date('Y-m-d H:i') : '-' }} - {{ session.endTime ? session.endTime|date('H:i') : '-' }}</td>
-                <td>
-                    <strong>{{ session.title }}</strong><br>
-                    <small style="color: var(--muted);">{{ session.sessionType }} | Capacity {{ session.capacity ?? session.maxAttendees }}</small>
-                </td>
-                <td>{{ session.conference ? session.conference.name : '-' }}</td>
-                <td>
-                    {% for room in session.rooms %}
-                        {{ room.name }}{% if not loop.last %}, {% endif %}
-                    {% else %}
-                        -
+<div class="session-shell">
+    <section class="session-hero">
+        <div class="actions">
+            <h1>Conference Session Schedule</h1>
+            {% if is_granted('ROLE_ADMIN') %}
+                <a class="btn" href="{{ path('app_session_new') }}">Create Session</a>
+            {% endif %}
+        </div>
+        <p>Scan your agenda faster with timeline cards, richer metadata chips, and one-click actions.</p>
+        <div class="session-stats">
+            <span class="session-stat">Sessions: {{ sessions|length }}</span>
+            <span class="session-stat">With Rooms: {{ with_room_count }}</span>
+            <span class="session-stat">With Speakers: {{ with_speaker_count }}</span>
+            <span class="session-stat">Filter Date: {{ selected_date ?: 'Any day' }}</span>
+        </div>
+    </section>
+
+    <section class="filter-panel">
+        <form method="get" class="filter-grid">
+            <div>
+                <label for="conference-filter">Conference</label>
+                <select id="conference-filter" name="conference">
+                    <option value="0">All conferences</option>
+                    {% for conference in conferences %}
+                        <option value="{{ conference.id }}" {% if selected_conference == conference.id %}selected{% endif %}>
+                            {{ conference.name }}
+                        </option>
                     {% endfor %}
-                </td>
-                <td>
-                    {% for speaker in session.speakers %}
-                        {{ speaker.name }}{% if not loop.last %}, {% endif %}
-                    {% else %}
-                        -
-                    {% endfor %}
-                </td>
-                <td>{{ session.track ?? '-' }}</td>
-                <td>{{ session.status }}</td>
-                <td>
-                    {% if is_granted('ROLE_ADMIN') %}
-                        <div class="actions">
-                            <a class="btn btn-secondary" href="{{ path('app_session_edit', {id: session.id}) }}">Edit</a>
-                            <form class="inline" method="post" action="{{ path('app_session_delete', {id: session.id}) }}" onsubmit="return confirm('Delete this session?');">
-                                <input type="hidden" name="_token" value="{{ csrf_token('delete_session_' ~ session.id) }}">
-                                <button class="btn btn-danger" type="submit">Delete</button>
-                            </form>
+                </select>
+            </div>
+            <div>
+                <label for="date-filter">Date</label>
+                <input id="date-filter" type="date" name="date" value="{{ selected_date }}">
+            </div>
+            <div class="actions">
+                <button class="btn" type="submit">Apply</button>
+                <a class="btn btn-secondary" href="{{ path('app_session_index') }}">Reset</a>
+            </div>
+        </form>
+    </section>
+
+    {% if sessions is not empty %}
+        <section class="session-list">
+            {% for session in sessions %}
+                <article class="session-card">
+                    <div class="session-row">
+                        <div class="session-time">
+                            {{ session.startTime ? session.startTime|date('D, M d Y') : '-' }}<br>
+                            {{ session.startTime ? session.startTime|date('H:i') : '-' }} - {{ session.endTime ? session.endTime|date('H:i') : '-' }}
                         </div>
-                    {% else %}
-                        <span style="color: var(--muted);">View only</span>
-                    {% endif %}
-                </td>
-            </tr>
-        {% else %}
-            <tr><td colspan="8">No sessions match the selected schedule filters.</td></tr>
-        {% endfor %}
-        </tbody>
-    </table>
+                        <div>
+                            <h2 class="session-title">{{ session.title }}</h2>
+                            <div class="session-subtitle">{{ session.conference ? session.conference.name : '-' }}</div>
+                            <div class="session-tags">
+                                <span class="session-tag">{{ session.sessionType }}</span>
+                                <span class="session-tag">Track: {{ session.track ?? '-' }}</span>
+                                <span class="session-tag">Status: {{ session.status }}</span>
+                                <span class="session-tag">Capacity: {{ session.capacity ?? session.maxAttendees }}</span>
+                                <span class="session-tag">
+                                    Room(s):
+                                    {% for room in session.rooms %}
+                                        {{ room.name }}{% if not loop.last %}, {% endif %}
+                                    {% else %}
+                                        -
+                                    {% endfor %}
+                                </span>
+                                <span class="session-tag">
+                                    Speaker(s):
+                                    {% for speaker in session.speakers %}
+                                        {{ speaker.name }}{% if not loop.last %}, {% endif %}
+                                    {% else %}
+                                        -
+                                    {% endfor %}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <footer>
+                        <span style="font-size: 12px; color: var(--muted);">Session #{{ session.id }}</span>
+                        <div class="session-actions">
+                            <a class="btn btn-secondary" href="{{ path('app_session_detail', {id: session.id}) }}">Details</a>
+                            {% if is_granted('ROLE_ADMIN') %}
+                                <a class="btn btn-secondary" href="{{ path('app_session_edit', {id: session.id}) }}">Edit</a>
+                                <form class="inline" method="post" action="{{ path('app_session_delete', {id: session.id}) }}" onsubmit="return confirm('Delete this session?');">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete_session_' ~ session.id) }}">
+                                    <button class="btn btn-danger" type="submit">Delete</button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    </footer>
+                </article>
+            {% endfor %}
+        </section>
+    {% else %}
+        <section class="card empty-card">
+            <h2 style="margin-top: 0;">No matching sessions</h2>
+            <p style="margin-bottom: 0; color: var(--muted);">Try a different conference/date filter or create a new session.</p>
+        </section>
+    {% endif %}
 </div>
 {% endblock %}

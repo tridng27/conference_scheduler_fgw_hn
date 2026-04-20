@@ -3,39 +3,183 @@
 {% block title %}Conferences{% endblock %}
 
 {% block body %}
-<div class="card">
-    <div class="actions">
-        <h1 style="margin: 0;">Conferences</h1>
-        {% if is_granted('ROLE_ADMIN') %}
-            <a class="btn" href="{{ path('app_conference_new') }}">New Conference</a>
-        {% endif %}
-    </div>
+<style>
+    .conference-shell {
+        display: grid;
+        gap: 16px;
+    }
+    .conference-hero {
+        background: linear-gradient(125deg, #133a56 0%, #155e7c 60%, #1e7ea4 100%);
+        color: #fff;
+        border-radius: 18px;
+        padding: 20px;
+        box-shadow: 0 16px 40px rgba(21, 94, 124, 0.28);
+        position: relative;
+        overflow: hidden;
+    }
+    .conference-hero::after {
+        content: "";
+        position: absolute;
+        width: 220px;
+        height: 220px;
+        right: -80px;
+        top: -90px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.34) 0%, rgba(255, 255, 255, 0) 72%);
+    }
+    .conference-hero h1 {
+        margin: 0;
+        font-size: clamp(1.5rem, 2.5vw, 2rem);
+        letter-spacing: 0.02em;
+    }
+    .conference-hero p {
+        margin: 8px 0 16px;
+        color: rgba(240, 248, 255, 0.9);
+        max-width: 62ch;
+    }
+    .conference-metrics {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .conference-metric {
+        background: rgba(255, 255, 255, 0.13);
+        border: 1px solid rgba(255, 255, 255, 0.24);
+        border-radius: 999px;
+        padding: 8px 12px;
+        font-size: 13px;
+    }
+    .conference-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 14px;
+    }
+    .conference-card {
+        border: 1px solid #c8d7e4;
+        background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+        border-radius: 14px;
+        padding: 14px;
+        display: grid;
+        gap: 12px;
+        box-shadow: 0 8px 24px rgba(11, 79, 108, 0.09);
+    }
+    .conference-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    .conference-name {
+        margin: 0;
+        font-size: 18px;
+        color: #0f3f58;
+    }
+    .status-pill {
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+        padding: 4px 10px;
+        border: 1px solid;
+        white-space: nowrap;
+    }
+    .status-pill.upcoming {
+        background: #dbeafe;
+        border-color: #93c5fd;
+        color: #1e40af;
+    }
+    .status-pill.ongoing {
+        background: #fef3c7;
+        border-color: #fcd34d;
+        color: #92400e;
+    }
+    .status-pill.default {
+        background: #dcfce7;
+        border-color: #86efac;
+        color: #166534;
+    }
+    .conference-details {
+        display: grid;
+        gap: 8px;
+        font-size: 13px;
+        color: #334155;
+    }
+    .conference-details strong {
+        color: #0f3f58;
+    }
+    .conference-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .empty-card {
+        text-align: center;
+        padding: 24px;
+    }
+    @media (max-width: 720px) {
+        .conference-hero {
+            padding: 16px;
+        }
+        .conference-card {
+            padding: 12px;
+        }
+    }
+</style>
 
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Location</th>
-                <th>Dates</th>
-                <th>Status</th>
-                <th>Max</th>
-                <th>Active</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for conference in conferences %}
-            <tr>
-                <td>{{ conference.id }}</td>
-                <td>{{ conference.name }}</td>
-                <td>{{ conference.location }}</td>
-                <td>{{ conference.startDate ? conference.startDate|date('Y-m-d H:i') : '-' }} to {{ conference.endDate ? conference.endDate|date('Y-m-d H:i') : '-' }}</td>
-                <td>{{ conference.status }}</td>
-                <td>{{ conference.maxAttendees }}</td>
-                <td>{{ conference.active ? 'Yes' : 'No' }}</td>
-                <td>
-                    <div class="actions">
+{% set upcoming_count = 0 %}
+{% set ongoing_count = 0 %}
+{% set active_count = 0 %}
+{% for conference in conferences %}
+    {% if conference.status == 'UPCOMING' %}
+        {% set upcoming_count = upcoming_count + 1 %}
+    {% elseif conference.status == 'ONGOING' %}
+        {% set ongoing_count = ongoing_count + 1 %}
+    {% endif %}
+    {% if conference.active %}
+        {% set active_count = active_count + 1 %}
+    {% endif %}
+{% endfor %}
+
+<div class="conference-shell">
+    <section class="conference-hero">
+        <div class="actions">
+            <h1>Conferences</h1>
+            {% if is_granted('ROLE_ADMIN') %}
+                <a class="btn" href="{{ path('app_conference_new') }}">New Conference</a>
+            {% endif %}
+        </div>
+        <p>Track every event at a glance with quick status markers, attendance limits, and fast links into each schedule.</p>
+        <div class="conference-metrics">
+            <span class="conference-metric">Total: {{ conferences|length }}</span>
+            <span class="conference-metric">Upcoming: {{ upcoming_count }}</span>
+            <span class="conference-metric">Ongoing: {{ ongoing_count }}</span>
+            <span class="conference-metric">Active: {{ active_count }}</span>
+        </div>
+    </section>
+
+    {% if conferences is not empty %}
+        <section class="conference-grid">
+            {% for conference in conferences %}
+                <article class="conference-card">
+                    <div class="conference-head">
+                        <h2 class="conference-name">{{ conference.name }}</h2>
+                        <span class="status-pill {{ conference.status == 'UPCOMING' ? 'upcoming' : (conference.status == 'ONGOING' ? 'ongoing' : 'default') }}">
+                            {{ conference.status }}
+                        </span>
+                    </div>
+
+                    <div class="conference-details">
+                        <div><strong>Location:</strong> {{ conference.location }}</div>
+                        <div>
+                            <strong>Dates:</strong>
+                            {{ conference.startDate ? conference.startDate|date('M d, Y H:i') : '-' }}
+                            to
+                            {{ conference.endDate ? conference.endDate|date('M d, Y H:i') : '-' }}
+                        </div>
+                        <div><strong>Capacity:</strong> {{ conference.maxAttendees }}</div>
+                        <div><strong>Active:</strong> {{ conference.active ? 'Yes' : 'No' }}</div>
+                    </div>
+
+                    <div class="conference-actions">
                         <a class="btn btn-secondary" href="{{ path('app_session_index', {conference: conference.id}) }}">View Schedule</a>
                         {% if is_granted('ROLE_ADMIN') %}
                             <a class="btn btn-secondary" href="{{ path('app_conference_edit', {id: conference.id}) }}">Edit</a>
@@ -45,12 +189,14 @@
                             </form>
                         {% endif %}
                     </div>
-                </td>
-            </tr>
-        {% else %}
-            <tr><td colspan="8">No conferences found.</td></tr>
-        {% endfor %}
-        </tbody>
-    </table>
+                </article>
+            {% endfor %}
+        </section>
+    {% else %}
+        <section class="card empty-card">
+            <h2 style="margin-top: 0;">No conferences yet</h2>
+            <p style="margin-bottom: 0; color: var(--muted);">Create your first conference to start building schedules.</p>
+        </section>
+    {% endif %}
 </div>
 {% endblock %}
