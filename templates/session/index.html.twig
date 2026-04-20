@@ -1,39 +1,76 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Sessions{% endblock %}
+{% block title %}Session Schedule{% endblock %}
 
 {% block body %}
 <div class="card">
     <div class="actions">
-        <h1 style="margin: 0;">Sessions</h1>
+        <h1 style="margin: 0;">Conference Session Schedule</h1>
         {% if is_granted('ROLE_ADMIN') %}
-            <a class="btn" href="{{ path('app_session_new') }}">New Session</a>
+            <a class="btn" href="{{ path('app_session_new') }}">Create Session</a>
         {% endif %}
     </div>
+
+    <form method="get" class="actions" style="margin-top: 12px;">
+        <div style="min-width: 220px;">
+            <label for="conference-filter">Conference</label>
+            <select id="conference-filter" name="conference">
+                <option value="0">All conferences</option>
+                {% for conference in conferences %}
+                    <option value="{{ conference.id }}" {% if selected_conference == conference.id %}selected{% endif %}>
+                        {{ conference.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div style="min-width: 220px;">
+            <label for="date-filter">Date</label>
+            <input id="date-filter" type="date" name="date" value="{{ selected_date }}">
+        </div>
+        <div class="actions" style="margin-top: 22px;">
+            <button class="btn" type="submit">Apply</button>
+            <a class="btn btn-secondary" href="{{ path('app_session_index') }}">Reset</a>
+        </div>
+    </form>
 
     <table>
         <thead>
             <tr>
-                <th>ID</th>
-                <th>Title</th>
-                <th>Conference</th>
                 <th>Time</th>
+                <th>Session</th>
+                <th>Conference</th>
+                <th>Room(s)</th>
+                <th>Speaker(s)</th>
+                <th>Track</th>
                 <th>Status</th>
-                <th>Speakers</th>
-                <th>Rooms</th>
                 <th>Actions</th>
             </tr>
         </thead>
         <tbody>
         {% for session in sessions %}
             <tr>
-                <td>{{ session.id }}</td>
-                <td>{{ session.title }}</td>
+                <td>{{ session.startTime ? session.startTime|date('Y-m-d H:i') : '-' }} - {{ session.endTime ? session.endTime|date('H:i') : '-' }}</td>
+                <td>
+                    <strong>{{ session.title }}</strong><br>
+                    <small style="color: var(--muted);">{{ session.sessionType }} | Capacity {{ session.capacity ?? session.maxAttendees }}</small>
+                </td>
                 <td>{{ session.conference ? session.conference.name : '-' }}</td>
-                <td>{{ session.startTime ? session.startTime|date('Y-m-d H:i') : '-' }} to {{ session.endTime ? session.endTime|date('Y-m-d H:i') : '-' }}</td>
+                <td>
+                    {% for room in session.rooms %}
+                        {{ room.name }}{% if not loop.last %}, {% endif %}
+                    {% else %}
+                        -
+                    {% endfor %}
+                </td>
+                <td>
+                    {% for speaker in session.speakers %}
+                        {{ speaker.name }}{% if not loop.last %}, {% endif %}
+                    {% else %}
+                        -
+                    {% endfor %}
+                </td>
+                <td>{{ session.track ?? '-' }}</td>
                 <td>{{ session.status }}</td>
-                <td>{{ session.speakers|length }}</td>
-                <td>{{ session.rooms|length }}</td>
                 <td>
                     {% if is_granted('ROLE_ADMIN') %}
                         <div class="actions">
@@ -49,7 +86,7 @@
                 </td>
             </tr>
         {% else %}
-            <tr><td colspan="8">No sessions found.</td></tr>
+            <tr><td colspan="8">No sessions match the selected schedule filters.</td></tr>
         {% endfor %}
         </tbody>
     </table>
