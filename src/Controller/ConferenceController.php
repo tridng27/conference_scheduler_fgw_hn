@@ -23,6 +23,14 @@ final class ConferenceController extends AbstractController
         ]);
     }
 
+    #[Route('/{id}/show', name: 'app_conference_show', methods: ['GET'])]
+    public function show(Conference $conference): Response
+    {
+        return $this->render('conference/show.html.twig', [
+            'conference' => $conference,
+        ]);
+    }
+
     #[Route('/new', name: 'app_conference_new', methods: ['GET', 'POST'])]
     #[IsGranted('ROLE_ADMIN')]
     public function new(Request $request, EntityManagerInterface $entityManager): Response

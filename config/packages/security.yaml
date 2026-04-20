@@ -39,6 +39,9 @@ security:
         - { path: ^/login$, roles: PUBLIC_ACCESS }
         - { path: ^/register$, roles: PUBLIC_ACCESS }
         - { path: ^/logout$, roles: PUBLIC_ACCESS }
+        - { path: ^/schedule$, roles: PUBLIC_ACCESS }
+        - { path: ^/session/\d+/detail$, roles: PUBLIC_ACCESS }
+        - { path: ^/conference/\d+/show$, roles: PUBLIC_ACCESS }
         - { path: ^/, roles: ROLE_USER }
 
 when@test:

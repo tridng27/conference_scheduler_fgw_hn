@@ -1,0 +1,29 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Session Details - {{ session.title }}{% endblock %}
+
+{% block body %}
+    <div class="card">
+        <h1>Session Details: {{ session.title }}</h1>
+        <p><strong>Start:</strong> {{ session.startTime|date('Y-m-d H:i') }}</p>
+        <p><strong>End:</strong> {{ session.endTime|date('Y-m-d H:i') }}</p>
+        <p><strong>Description:</strong> {{ session.description }}</p>
+        <p><strong>Conference:</strong> {{ session.conference.name }}</p>
+
+        <h2>Speakers</h2>
+        {% for speaker in session.speakers %}
+            <div>
+                <p><strong>{{ speaker.name }}</strong> ({{ speaker.email }})</p>
+                <p>Company: {{ speaker.company }}</p>
+                <p>Job Title: {{ speaker.jobTitle }}</p>
+            </div>
+        {% endfor %}
+
+        <h2>Rooms</h2>
+        {% for room in session.rooms %}
+            <p><strong>{{ room.name }}</strong> - Capacity: {{ room.capacity }}</p>
+        {% endfor %}
+
+        <a href="{{ path('app_schedule') }}">Back to Schedule</a>
+    </div>
+{% endblock %}

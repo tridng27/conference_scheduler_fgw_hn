@@ -1,0 +1,137 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Conference Details - {{ conference.name }}{% endblock %}
+
+{% block body %}
+    <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+            <h1 style="margin: 0; color: #0b4f6c;">🏛️ Conference Details</h1>
+            <div>
+                <a href="{{ path('app_conference_index') }}" class="btn">← Back to Conferences</a>
+                {% if is_granted('ROLE_ADMIN') %}
+                    <a href="{{ path('app_conference_edit', {id: conference.id}) }}" class="btn btn-secondary" style="margin-left: 8px;">Edit</a>
+                {% endif %}
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 300px; gap: 24px;">
+
+            <!-- Conference Information -->
+            <div>
+                <h2 style="color: #0b4f6c; margin-bottom: 16px;">Conference Information</h2>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+                    <div>
+                        <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 4px;">Name</label>
+                        <div style="padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; background: #f9fafb;">{{ conference.name }}</div>
+                    </div>
+
+                    <div>
+                        <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 4px;">Location</label>
+                        <div style="padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; background: #f9fafb;">{{ conference.location }}</div>
+                    </div>
+
+                    <div>
+                        <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 4px;">Start Date</label>
+                        <div style="padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; background: #f9fafb;">{{ conference.startDate|date('M d, Y') }}</div>
+                    </div>
+
+                    <div>
+                        <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 4px;">End Date</label>
+                        <div style="padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; background: #f9fafb;">{{ conference.endDate|date('M d, Y') }}</div>
+                    </div>
+
+                    <div>
+                        <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 4px;">Max Attendees</label>
+                        <div style="padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; background: #f9fafb;">{{ conference.maxAttendees }}</div>
+                    </div>
+
+                    <div>
+                        <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 4px;">Status</label>
+                        <div style="padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; background: #f9fafb;">
+                            <span style="display: inline-block; padding: 4px 8px; border-radius: 4px; background: {% if conference.status == 'UPCOMING' %}#dbeafe{% elseif conference.status == 'ONGOING' %}#fef3c7{% else %}#dbeafe{% endif %}; color: {% if conference.status == 'UPCOMING' %}#0369a1{% elseif conference.status == 'ONGOING' %}#92400e{% else %}#0369a1{% endif %}; font-size: 12px; font-weight: 600;">
+                                {{ conference.status }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                {% if conference.description %}
+                    <div style="margin-bottom: 24px;">
+                        <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 8px;">Description</label>
+                        <div style="padding: 16px; border: 1px solid #d1d5db; border-radius: 6px; background: #f9fafb; min-height: 80px;">
+                            {{ conference.description }}
+                        </div>
+                    </div>
+                {% endif %}
+
+                <!-- Sessions Section -->
+                <div>
+                    <h3 style="color: #0b4f6c; margin-bottom: 12px;">📅 Sessions</h3>
+                    {% set sessions = conference.sessions %}
+                    {% if sessions|length > 0 %}
+                        <div style="display: grid; gap: 12px;">
+                            {% for session in sessions %}
+                                <div style="padding: 16px; border: 1px solid #e5e7eb; border-radius: 8px; background: #f8fafc;">
+                                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                        <div style="flex: 1;">
+                                            <div style="font-weight: 600; color: #1f2937; margin-bottom: 4px;">{{ session.title }}</div>
+                                            <div style="font-size: 14px; color: #6b7280; margin-bottom: 8px;">
+                                                {{ session.startTime|date('M d, Y H:i') }} - {{ session.endTime|date('H:i') }}
+                                            </div>
+                                            {% if session.speakers|length > 0 %}
+                                                <div style="font-size: 13px; color: #9ca3af;">
+                                                    Speakers: {{ session.speakers|map(s => s.user.firstName ~ ' ' ~ s.user.lastName)|join(', ') }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <a href="{{ path('app_session_detail', {id: session.id}) }}" class="btn btn-secondary" style="font-size: 12px; padding: 6px 12px;">View Details</a>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div style="padding: 16px; border: 1px solid #e5e7eb; border-radius: 8px; background: #f8fafc; text-align: center; color: #9ca3af;">
+                            No sessions scheduled for this conference
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Sidebar with Statistics -->
+            <div>
+                <h2 style="color: #0b4f6c; margin-bottom: 16px;">📊 Statistics</h2>
+
+                <div style="padding: 20px; border: 1px solid #e5e7eb; border-radius: 8px; background: #f8fafc;">
+                    <div style="display: grid; gap: 16px;">
+                        <div style="text-align: center;">
+                            <div style="font-size: 32px; font-weight: 700; color: #0b4f6c;">{{ conference.sessions|length }}</div>
+                            <div style="font-size: 14px; color: #6b7280;">Total Sessions</div>
+                        </div>
+
+                        <div style="text-align: center;">
+                            <div style="font-size: 32px; font-weight: 700; color: #0b4f6c;">
+                                {% set speakers = conference.sessions|reduce((carry, session) => carry + session.speakers|length, 0) %}
+                                {{ speakers }}
+                            </div>
+                            <div style="font-size: 14px; color: #6b7280;">Total Speakers</div>
+                        </div>
+
+                        <div style="text-align: center;">
+                            <div style="font-size: 32px; font-weight: 700; color: #0b4f6c;">{{ conference.maxAttendees }}</div>
+                            <div style="font-size: 14px; color: #6b7280;">Max Capacity</div>
+                        </div>
+
+                        <div style="text-align: center;">
+                            <div style="font-size: 32px; font-weight: 700; color: #0b4f6c;">
+                                {% set duration = date(conference.endDate).diff(date(conference.startDate)) %}
+                                {{ duration.days + 1 }}
+                            </div>
+                            <div style="font-size: 14px; color: #6b7280;">Days Duration</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

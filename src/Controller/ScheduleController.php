@@ -35,4 +35,18 @@ final class ScheduleController extends AbstractController
             'conferences' => $conferences,
         ]);
     }
+
+    #[Route('/session/{id}/detail', name: 'app_session_detail', methods: ['GET'])]
+    public function sessionDetail(int $id, SessionRepository $sessionRepository): Response
+    {
+        $session = $sessionRepository->find($id);
+
+        if (!$session) {
+            throw $this->createNotFoundException('Session not found');
+        }
+
+        return $this->render('schedule/session_detail.html.twig', [
+            'session' => $session,
+        ]);
+    }
 }

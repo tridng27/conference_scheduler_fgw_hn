@@ -63,6 +63,7 @@
                                             <th style="width: 150px;">👥 Speakers</th>
                                             <th style="width: 100px; text-align: center;">Attendees</th>
                                             <th style="width: 80px; text-align: center;">Type</th>
+                                            <th style="width: 100px; text-align: center;">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -107,6 +108,9 @@
                                                     <span style="display: inline-block; padding: 4px 8px; border-radius: 4px; background: #f0fdf4; color: #166534; font-size: 12px; font-weight: 600; border: 1px solid #bbf7d0;">
                                                         {{ session.sessionType ?? 'PRESENTATION' }}
                                                     </span>
+                                                </td>
+                                                <td style="text-align: center;">
+                                                    <a href="{{ path('app_session_detail', {id: session.id}) }}" class="btn btn-secondary" style="font-size: 12px; padding: 6px 12px;">Detail</a>
                                                 </td>
                                             </tr>
                                         {% endfor %}
