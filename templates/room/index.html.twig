@@ -3,53 +3,111 @@
 {% block title %}Rooms{% endblock %}
 
 {% block body %}
-<div class="card">
-    <div class="actions">
-        <h1 style="margin: 0;">Rooms</h1>
-        {% if is_granted('ROLE_ADMIN') %}
-            <a class="btn" href="{{ path('app_room_new') }}">New Room</a>
-        {% endif %}
-    </div>
+<style>
+    .room-shell { display: grid; gap: 16px; }
+    .room-hero {
+        border-radius: 18px;
+        padding: 20px;
+        color: #fff;
+        background: linear-gradient(130deg, #4c2f34 0%, #1d5d77 58%, #1f8f6e 100%);
+        box-shadow: 0 14px 36px rgba(29, 93, 119, 0.28);
+    }
+    .room-hero h1 { margin: 0; font-size: clamp(1.4rem, 2.4vw, 1.95rem); }
+    .room-hero p { margin: 8px 0 14px; color: rgba(236, 248, 255, 0.92); }
+    .room-metrics { display: flex; gap: 9px; flex-wrap: wrap; }
+    .room-metric {
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.26);
+        background: rgba(255, 255, 255, 0.14);
+        padding: 7px 11px;
+        font-size: 12px;
+    }
+    .room-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 14px;
+    }
+    .room-card {
+        border: 1px solid #c8d7e4;
+        border-radius: 14px;
+        padding: 14px;
+        background: linear-gradient(180deg, #ffffff 0%, #f9fbff 100%);
+        box-shadow: 0 8px 20px rgba(11, 79, 108, 0.08);
+        display: grid;
+        gap: 10px;
+    }
+    .room-title { margin: 0; font-size: 18px; color: #0f3f58; }
+    .room-id { font-size: 12px; color: var(--muted); }
+    .room-details { display: grid; gap: 6px; font-size: 13px; color: #334155; }
+    .room-details strong { color: #0f3f58; }
+    .room-tags { display: flex; gap: 7px; flex-wrap: wrap; }
+    .room-tag {
+        font-size: 12px;
+        color: #1f4e69;
+        border-radius: 999px;
+        border: 1px solid #b8d1e2;
+        background: #f2f8ff;
+        padding: 4px 9px;
+    }
+    .room-actions { display: flex; gap: 8px; flex-wrap: wrap; border-top: 1px dashed #d5e2ee; padding-top: 10px; }
+    .empty-card { text-align: center; padding: 24px; }
+</style>
 
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Building</th>
-                <th>Floor</th>
-                <th>Capacity</th>
-                <th>Venues</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for room in rooms %}
-            <tr>
-                <td>{{ room.id }}</td>
-                <td>{{ room.name }}</td>
-                <td>{{ room.building }}</td>
-                <td>{{ room.floor }}</td>
-                <td>{{ room.capacity }}</td>
-                <td>{{ room.venues|length }}</td>
-                <td>
-                    {% if is_granted('ROLE_ADMIN') %}
-                        <div class="actions">
+{% set total_capacity = 0 %}
+{% for room in rooms %}
+    {% set total_capacity = total_capacity + room.capacity %}
+{% endfor %}
+
+<div class="room-shell">
+    <section class="room-hero">
+        <div class="actions">
+            <h1>Rooms</h1>
+            {% if is_granted('ROLE_ADMIN') %}
+                <a class="btn" href="{{ path('app_room_new') }}">New Room</a>
+            {% endif %}
+        </div>
+        <p>Organize room inventory with clear location metadata and seating capacity visibility.</p>
+        <div class="room-metrics">
+            <span class="room-metric">Rooms: {{ rooms|length }}</span>
+            <span class="room-metric">Total Capacity: {{ total_capacity }}</span>
+        </div>
+    </section>
+
+    {% if rooms is not empty %}
+        <section class="room-grid">
+            {% for room in rooms %}
+                <article class="room-card">
+                    <div>
+                        <h2 class="room-title">{{ room.name }}</h2>
+                        <div class="room-id">Room #{{ room.id }}</div>
+                    </div>
+                    <div class="room-details">
+                        <div><strong>Building:</strong> {{ room.building }}</div>
+                        <div><strong>Floor:</strong> {{ room.floor }}</div>
+                    </div>
+                    <div class="room-tags">
+                        <span class="room-tag">Capacity: {{ room.capacity }}</span>
+                        <span class="room-tag">Venues: {{ room.venues|length }}</span>
+                    </div>
+                    <div class="room-actions">
+                        {% if is_granted('ROLE_ADMIN') %}
                             <a class="btn btn-secondary" href="{{ path('app_room_edit', {id: room.id}) }}">Edit</a>
                             <form class="inline" method="post" action="{{ path('app_room_delete', {id: room.id}) }}" onsubmit="return confirm('Delete this room?');">
                                 <input type="hidden" name="_token" value="{{ csrf_token('delete_room_' ~ room.id) }}">
                                 <button class="btn btn-danger" type="submit">Delete</button>
                             </form>
-                        </div>
-                    {% else %}
-                        <span style="color: var(--muted);">View only</span>
-                    {% endif %}
-                </td>
-            </tr>
-        {% else %}
-            <tr><td colspan="7">No rooms found.</td></tr>
-        {% endfor %}
-        </tbody>
-    </table>
+                        {% else %}
+                            <span style="color: var(--muted); font-size: 13px;">View only</span>
+                        {% endif %}
+                    </div>
+                </article>
+            {% endfor %}
+        </section>
+    {% else %}
+        <section class="card empty-card">
+            <h2 style="margin-top: 0;">No rooms found</h2>
+            <p style="margin-bottom: 0; color: var(--muted);">Add rooms to make scheduling and capacity planning easier.</p>
+        </section>
+    {% endif %}
 </div>
 {% endblock %}

@@ -3,53 +3,111 @@
 {% block title %}Speakers{% endblock %}
 
 {% block body %}
-<div class="card">
-    <div class="actions">
-        <h1 style="margin: 0;">Speakers</h1>
-        {% if is_granted('ROLE_ADMIN') %}
-            <a class="btn" href="{{ path('app_speaker_new') }}">New Speaker</a>
-        {% endif %}
-    </div>
+<style>
+    .speaker-shell { display: grid; gap: 16px; }
+    .speaker-hero {
+        border-radius: 18px;
+        padding: 20px;
+        color: #fff;
+        background: linear-gradient(130deg, #3f2d56 0%, #2d5c73 54%, #178a8f 100%);
+        box-shadow: 0 14px 36px rgba(45, 92, 115, 0.28);
+    }
+    .speaker-hero h1 { margin: 0; font-size: clamp(1.4rem, 2.4vw, 1.95rem); }
+    .speaker-hero p { margin: 8px 0 14px; color: rgba(236, 248, 255, 0.92); }
+    .speaker-metrics { display: flex; gap: 9px; flex-wrap: wrap; }
+    .speaker-metric {
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.26);
+        background: rgba(255, 255, 255, 0.14);
+        padding: 7px 11px;
+        font-size: 12px;
+    }
+    .speaker-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 14px;
+    }
+    .speaker-card {
+        border: 1px solid #c8d7e4;
+        border-radius: 14px;
+        padding: 14px;
+        background: linear-gradient(180deg, #ffffff 0%, #f9fbff 100%);
+        box-shadow: 0 8px 20px rgba(11, 79, 108, 0.08);
+        display: grid;
+        gap: 10px;
+    }
+    .speaker-title { margin: 0; font-size: 18px; color: #0f3f58; }
+    .speaker-id { font-size: 12px; color: var(--muted); }
+    .speaker-tags { display: flex; flex-wrap: wrap; gap: 7px; }
+    .speaker-tag {
+        font-size: 12px;
+        color: #1f4e69;
+        border-radius: 999px;
+        border: 1px solid #b8d1e2;
+        background: #f2f8ff;
+        padding: 4px 9px;
+    }
+    .speaker-details { display: grid; gap: 6px; font-size: 13px; color: #334155; }
+    .speaker-details strong { color: #0f3f58; }
+    .speaker-actions { display: flex; gap: 8px; flex-wrap: wrap; border-top: 1px dashed #d5e2ee; padding-top: 10px; }
+    .empty-card { text-align: center; padding: 24px; }
+</style>
 
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Company</th>
-                <th>User</th>
-                <th>Sessions</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for speaker in speakers %}
-            <tr>
-                <td>{{ speaker.id }}</td>
-                <td>{{ speaker.name }}</td>
-                <td>{{ speaker.email }}</td>
-                <td>{{ speaker.company }}</td>
-                <td>{{ speaker.user ? speaker.user.email : '-' }}</td>
-                <td>{{ speaker.sessions|length }}</td>
-                <td>
-                    {% if is_granted('ROLE_ADMIN') %}
-                        <div class="actions">
+{% set total_sessions = 0 %}
+{% for speaker in speakers %}
+    {% set total_sessions = total_sessions + (speaker.sessions|length) %}
+{% endfor %}
+
+<div class="speaker-shell">
+    <section class="speaker-hero">
+        <div class="actions">
+            <h1>Speakers</h1>
+            {% if is_granted('ROLE_ADMIN') %}
+                <a class="btn" href="{{ path('app_speaker_new') }}">New Speaker</a>
+            {% endif %}
+        </div>
+        <p>Give each presenter a clearer profile with affiliation, linked user account, and session load.</p>
+        <div class="speaker-metrics">
+            <span class="speaker-metric">Speakers: {{ speakers|length }}</span>
+            <span class="speaker-metric">Assigned Sessions: {{ total_sessions }}</span>
+        </div>
+    </section>
+
+    {% if speakers is not empty %}
+        <section class="speaker-grid">
+            {% for speaker in speakers %}
+                <article class="speaker-card">
+                    <div>
+                        <h2 class="speaker-title">{{ speaker.name }}</h2>
+                        <div class="speaker-id">Speaker #{{ speaker.id }}</div>
+                    </div>
+                    <div class="speaker-details">
+                        <div><strong>Email:</strong> {{ speaker.email }}</div>
+                        <div><strong>Company:</strong> {{ speaker.company }}</div>
+                        <div><strong>User:</strong> {{ speaker.user ? speaker.user.email : '-' }}</div>
+                    </div>
+                    <div class="speaker-tags">
+                        <span class="speaker-tag">Sessions: {{ speaker.sessions|length }}</span>
+                    </div>
+                    <div class="speaker-actions">
+                        {% if is_granted('ROLE_ADMIN') %}
                             <a class="btn btn-secondary" href="{{ path('app_speaker_edit', {id: speaker.id}) }}">Edit</a>
                             <form class="inline" method="post" action="{{ path('app_speaker_delete', {id: speaker.id}) }}" onsubmit="return confirm('Delete this speaker?');">
                                 <input type="hidden" name="_token" value="{{ csrf_token('delete_speaker_' ~ speaker.id) }}">
                                 <button class="btn btn-danger" type="submit">Delete</button>
                             </form>
-                        </div>
-                    {% else %}
-                        <span style="color: var(--muted);">View only</span>
-                    {% endif %}
-                </td>
-            </tr>
-        {% else %}
-            <tr><td colspan="7">No speakers found.</td></tr>
-        {% endfor %}
-        </tbody>
-    </table>
+                        {% else %}
+                            <span style="color: var(--muted); font-size: 13px;">View only</span>
+                        {% endif %}
+                    </div>
+                </article>
+            {% endfor %}
+        </section>
+    {% else %}
+        <section class="card empty-card">
+            <h2 style="margin-top: 0;">No speakers found</h2>
+            <p style="margin-bottom: 0; color: var(--muted);">Add speakers to start assigning people to sessions.</p>
+        </section>
+    {% endif %}
 </div>
 {% endblock %}

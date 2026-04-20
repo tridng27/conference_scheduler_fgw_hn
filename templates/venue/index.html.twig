@@ -3,51 +3,99 @@
 {% block title %}Venues{% endblock %}
 
 {% block body %}
-<div class="card">
-    <div class="actions">
-        <h1 style="margin: 0;">Venues</h1>
-        {% if is_granted('ROLE_ADMIN') %}
-            <a class="btn" href="{{ path('app_venue_new') }}">New Venue</a>
-        {% endif %}
-    </div>
+<style>
+    .venue-shell { display: grid; gap: 16px; }
+    .venue-hero {
+        border-radius: 18px;
+        padding: 20px;
+        color: #fff;
+        background: linear-gradient(135deg, #2f354a 0%, #1e5f78 54%, #1f9c88 100%);
+        box-shadow: 0 14px 36px rgba(30, 95, 120, 0.28);
+    }
+    .venue-hero h1 { margin: 0; font-size: clamp(1.4rem, 2.4vw, 1.95rem); }
+    .venue-hero p { margin: 8px 0 14px; color: rgba(236, 248, 255, 0.92); }
+    .venue-metrics { display: flex; gap: 9px; flex-wrap: wrap; }
+    .venue-metric {
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.26);
+        background: rgba(255, 255, 255, 0.14);
+        padding: 7px 11px;
+        font-size: 12px;
+    }
+    .venue-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 14px;
+    }
+    .venue-card {
+        border: 1px solid #c8d7e4;
+        border-radius: 14px;
+        padding: 14px;
+        background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
+        box-shadow: 0 8px 20px rgba(11, 79, 108, 0.08);
+        display: grid;
+        gap: 10px;
+    }
+    .venue-title { margin: 0; font-size: 18px; color: #0f3f58; }
+    .venue-id { font-size: 12px; color: var(--muted); }
+    .venue-details { display: grid; gap: 6px; font-size: 13px; color: #334155; }
+    .venue-details strong { color: #0f3f58; }
+    .venue-actions { display: flex; gap: 8px; flex-wrap: wrap; border-top: 1px dashed #d5e2ee; padding-top: 10px; }
+    .empty-card { text-align: center; padding: 24px; }
+</style>
 
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Address</th>
-                <th>Capacity</th>
-                <th>Rooms</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for venue in venues %}
-            <tr>
-                <td>{{ venue.id }}</td>
-                <td>{{ venue.name }}</td>
-                <td>{{ venue.address }}</td>
-                <td>{{ venue.capacity ?? '-' }}</td>
-                <td>{{ venue.rooms|length }}</td>
-                <td>
-                    {% if is_granted('ROLE_ADMIN') %}
-                        <div class="actions">
+{% set total_rooms = 0 %}
+{% for venue in venues %}
+    {% set total_rooms = total_rooms + (venue.rooms|length) %}
+{% endfor %}
+
+<div class="venue-shell">
+    <section class="venue-hero">
+        <div class="actions">
+            <h1>Venues</h1>
+            {% if is_granted('ROLE_ADMIN') %}
+                <a class="btn" href="{{ path('app_venue_new') }}">New Venue</a>
+            {% endif %}
+        </div>
+        <p>Manage event locations with quick visibility into room inventory and space limits.</p>
+        <div class="venue-metrics">
+            <span class="venue-metric">Venues: {{ venues|length }}</span>
+            <span class="venue-metric">Rooms Linked: {{ total_rooms }}</span>
+        </div>
+    </section>
+
+    {% if venues is not empty %}
+        <section class="venue-grid">
+            {% for venue in venues %}
+                <article class="venue-card">
+                    <div>
+                        <h2 class="venue-title">{{ venue.name }}</h2>
+                        <div class="venue-id">Venue #{{ venue.id }}</div>
+                    </div>
+                    <div class="venue-details">
+                        <div><strong>Address:</strong> {{ venue.address }}</div>
+                        <div><strong>Capacity:</strong> {{ venue.capacity ?? '-' }}</div>
+                        <div><strong>Rooms:</strong> {{ venue.rooms|length }}</div>
+                    </div>
+                    <div class="venue-actions">
+                        {% if is_granted('ROLE_ADMIN') %}
                             <a class="btn btn-secondary" href="{{ path('app_venue_edit', {id: venue.id}) }}">Edit</a>
                             <form class="inline" method="post" action="{{ path('app_venue_delete', {id: venue.id}) }}" onsubmit="return confirm('Delete this venue?');">
                                 <input type="hidden" name="_token" value="{{ csrf_token('delete_venue_' ~ venue.id) }}">
                                 <button class="btn btn-danger" type="submit">Delete</button>
                             </form>
-                        </div>
-                    {% else %}
-                        <span style="color: var(--muted);">View only</span>
-                    {% endif %}
-                </td>
-            </tr>
-        {% else %}
-            <tr><td colspan="6">No venues found.</td></tr>
-        {% endfor %}
-        </tbody>
-    </table>
+                        {% else %}
+                            <span style="color: var(--muted); font-size: 13px;">View only</span>
+                        {% endif %}
+                    </div>
+                </article>
+            {% endfor %}
+        </section>
+    {% else %}
+        <section class="card empty-card">
+            <h2 style="margin-top: 0;">No venues found</h2>
+            <p style="margin-bottom: 0; color: var(--muted);">Create a venue to start assigning rooms and sessions.</p>
+        </section>
+    {% endif %}
 </div>
 {% endblock %}
