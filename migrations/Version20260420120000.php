@@ -25,6 +25,9 @@ final class Version20260420120000 extends AbstractMigration
         // Create mock rooms
         $this->createMockRooms();
         
+        // Create mock speakers
+        $this->createMockSpeakerEntities();
+        
         // Create mock conferences
         $this->createMockConferences();
         
@@ -33,6 +36,9 @@ final class Version20260420120000 extends AbstractMigration
         
         // Create mock speakers
         $this->createMockSpeakers();
+        
+        // Assign rooms to sessions
+        $this->assignRoomsToSessions();
         
         // Create mock registrations
         $this->createMockRegistrations();
@@ -131,6 +137,34 @@ final class Version20260420120000 extends AbstractMigration
                         $attendee['lastName'],
                         null,
                         'ATTENDEE',
+                    ]
+                );
+            }
+        }
+    }
+
+    private function createMockSpeakerEntities(): void
+    {
+        // Get speaker users
+        $speakerUsers = $this->connection->fetchAllAssociative('SELECT id, first_name, last_name, email FROM "user" WHERE role = ?', ['SPEAKER']);
+
+        $companies = ['TechCorp', 'InnovateLabs', 'DataDynamics', 'CloudSolutions'];
+        $jobTitles = ['Senior Developer', 'Tech Lead', 'Principal Engineer', 'Software Architect'];
+        $expertise = ['JavaScript', 'Python', 'AI/ML', 'Cloud Computing', 'DevOps', 'React', 'Node.js'];
+
+        foreach ($speakerUsers as $index => $user) {
+            $exists = (int) $this->connection->fetchOne('SELECT COUNT(*) FROM speaker WHERE usser_id = ?', [$user['id']]);
+            if (0 === $exists) {
+                $this->addSql(
+                    'INSERT INTO speaker (name, email, company, job_title, bio, usser_id, expertise) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                    [
+                        $user['first_name'] . ' ' . $user['last_name'],
+                        $user['email'],
+                        $companies[$index % count($companies)],
+                        $jobTitles[$index % count($jobTitles)],
+                        'Experienced professional with expertise in ' . $expertise[$index % count($expertise)] . '. Passionate about sharing knowledge and mentoring others.',
+                        $user['id'],
+                        $expertise[$index % count($expertise)],
                     ]
                 );
             }
@@ -323,7 +357,7 @@ final class Version20260420120000 extends AbstractMigration
 
     private function createMockSpeakers(): void
     {
-        $speakers = $this->connection->fetchAllAssociative('SELECT id FROM "user" WHERE role = ?', ['SPEAKER']);
+        $speakers = $this->connection->fetchAllAssociative('SELECT id FROM speaker ORDER BY id');
         $sessions = $this->connection->fetchAllAssociative('SELECT id FROM session ORDER BY id');
 
         if (empty($speakers) || empty($sessions)) {
@@ -356,6 +390,33 @@ final class Version20260420120000 extends AbstractMigration
                 $this->addSql(
                     'INSERT INTO session_speaker (session_id, speaker_id) VALUES (?, ?)',
                     [$session['id'], $speakers[$speakerIndex2]['id']]
+                );
+            }
+        }
+    }
+
+    private function assignRoomsToSessions(): void
+    {
+        $rooms = $this->connection->fetchAllAssociative('SELECT id FROM room ORDER BY id');
+        $sessions = $this->connection->fetchAllAssociative('SELECT id FROM session ORDER BY id');
+
+        if (empty($rooms) || empty($sessions)) {
+            return;
+        }
+
+        // Assign rooms to sessions (1 room per session)
+        foreach ($sessions as $index => $session) {
+            $roomIndex = $index % count($rooms);
+
+            $exists = (int) $this->connection->fetchOne(
+                'SELECT COUNT(*) FROM session_room WHERE session_id = ? AND room_id = ?',
+                [$session['id'], $rooms[$roomIndex]['id']]
+            );
+
+            if (0 === $exists) {
+                $this->addSql(
+                    'INSERT INTO session_room (session_id, room_id) VALUES (?, ?)',
+                    [$session['id'], $rooms[$roomIndex]['id']]
                 );
             }
         }
