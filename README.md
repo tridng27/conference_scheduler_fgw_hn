@@ -36,7 +36,7 @@ php bin/console doctrine:migrations:migrate
 
 4. Start server:
 ```bash
-php -S 127.0.0.1:8000 -t public
+composer serve
 ```
 
 Then open: `http://127.0.0.1:8000/`
@@ -76,6 +76,14 @@ php bin/console lint:twig templates
 php bin/console doctrine:schema:validate
 php bin/phpunit
 ```
+
+## Performance Note (Dev)
+
+This project includes `.php-dev.ini` and the `composer serve` script enables:
+- `opcache.enable_cli=1`
+- larger `realpath_cache`
+
+This avoids very slow Symfony bootstrap times on Windows when using `php -S`.
 
 ## Notes
 

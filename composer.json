@@ -53,7 +53,8 @@
             "symfony/runtime": true
         },
         "bump-after-update": true,
-        "sort-packages": true
+        "sort-packages": true,
+        "process-timeout": 0
     },
     "autoload": {
         "psr-4": {
@@ -78,7 +79,8 @@
         "symfony/polyfill-php84": "*"
     },
     "scripts": {
-        "serve": "php -S 127.0.0.1:8000 -t public public/index.php",
+        "serve": "php -c .php-dev.ini -S 127.0.0.1:8000 -t public public/index.php",
+        "serve:prod": "set APP_ENV=prod&& set APP_DEBUG=0&& php -c .php-dev.ini -S 127.0.0.1:8000 -t public public/index.php",
         "auto-scripts": {
             "cache:clear": "symfony-cmd",
             "assets:install %PUBLIC_DIR%": "symfony-cmd",
