@@ -8,11 +8,89 @@
     <p style="color: var(--muted); margin-top: 0;">Registered users can view all data. Only admins can modify data.</p>
 
     {{ form_start(form) }}
-        {{ form_widget(form) }}
-        <div class="actions" style="margin-top: 10px;">
-            <button class="btn" type="submit">Register</button>
-            <a class="btn btn-secondary" href="{{ path('app_login') }}">Back to login</a>
+        {{form_row(form.email)}}
+        {{form_row(form.firstName)}}
+        {{form_row(form.lastName)}}
+        {{form_row(form.phone)}}
+        {{ form_row(form.plainPassword, {
+            attr: {
+                required: 'required',
+                minlength: '17',
+                pattern: '(?=.*[A-Z])(?=.*[0-9]).{17,}',
+                title: 'Password must be over 16 characters and include at least one uppercase letter and one number.'
+            }
+        }) }}
+        <div id="password_errors" style="margin-top: 8px;"></div>
+        <div class = "actions" style= "margin-top: 10px;">
+            <button class = "btn" type= "submit">
+                Register
+            </button>
+            <a class = "btn btn-secondary" href= "{{ path('app_login')}}">Back to login</a>
         </div>
     {{ form_end(form) }}
+
+    <script>
+        function initRegisterPasswordValidation() {
+            const passwordInput = document.getElementById('registration_account_plainPassword');
+            if (!passwordInput) {
+                return;
+            }
+            if (passwordInput.dataset.validationBound === '1') {
+                return;
+            }
+            passwordInput.dataset.validationBound = '1';
+            const form = passwordInput.closest('form');
+            const errorsDiv = document.getElementById('password_errors');
+            if (!form || !errorsDiv) {
+                return;
+            }
+
+            passwordInput.setAttribute('minlength', '17');
+            passwordInput.setAttribute('required', 'required');
+            passwordInput.setAttribute('pattern', '(?=.*[A-Z])(?=.*[0-9]).{17,}');
+            passwordInput.setAttribute('title', 'Password must be over 16 characters and include at least one uppercase letter and one number.');
+
+            function validatePassword() {
+                const password = passwordInput.value;
+                const errors = [];
+
+                if (password.length <= 16) {
+                    errors.push('Password must be over 16 characters');
+                }
+                if (!/[0-9]/.test(password)) {
+                    errors.push('Password must include at least one number');
+                }
+                if (!/[A-Z]/.test(password)) {
+                    errors.push('Password must include at least one uppercase letter');
+                }
+
+                errorsDiv.innerHTML = errors
+                    .map(error => `<p style="color: red; margin: 0;">${error}</p>`)
+                    .join('');
+
+                if (errors.length > 0) {
+                    passwordInput.setCustomValidity('Password does not meet requirements.');
+                }
+                else {
+                    passwordInput.setCustomValidity('');
+                }
+
+                return errors.length === 0;
+            }
+
+            passwordInput.addEventListener('input', validatePassword);
+            passwordInput.addEventListener('blur', validatePassword);
+            form.addEventListener('submit', function(event) {
+                if (!validatePassword()) {
+                    event.preventDefault();
+                    passwordInput.reportValidity();
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', initRegisterPasswordValidation);
+        document.addEventListener('turbo:load', initRegisterPasswordValidation);
+        initRegisterPasswordValidation();
+    </script>
 </div>
 {% endblock %}

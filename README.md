@@ -1,13 +1,39 @@
 # Conference Scheduler
 
-Conference Scheduler is a Symfony 8 web application for managing:
-- Conferences
-- Sessions
-- Speakers
-- Venues
-- Rooms
-- Registrations
-- Users
+Conference Scheduler is a Symfony 8 web app for managing conferences, sessions, speakers, venues, rooms, registrations, and users.
+
+## Current Feature Set
+
+- Authentication with form login (`/login`) and registration (`/register`)
+- Role-based access:
+  - `ROLE_USER`: can access the app after login
+  - `ROLE_ADMIN`: can create/edit/delete data and manage users
+- Dashboard (`/`) with summary metrics and upcoming/today schedule widgets
+- Full module CRUD pages:
+  - Conferences (`/conference`), including detail page (`/conference/{id}/show`)
+  - Sessions (`/session`) with conference/date filters and conflict validation
+  - Speakers (`/speaker`)
+  - Venues (`/venue`)
+  - Rooms (`/room`)
+  - Registrations (`/registration`)
+- Public schedule browsing:
+  - Weekly timetable/schedule (`/schedule`)
+  - Timetable session detail (`/session/{id}/detail`)
+- User self-profile management (`/profile`)
+- Admin user role management (`/user`) with promote/demote and last-admin protection
+
+## UI Highlights (2026-04 updates)
+
+- Redesigned, non-generic card-based index pages for:
+  - Conferences
+  - Sessions
+  - Venues
+  - Speakers
+  - Rooms
+- Hero sections, visual metrics chips, status/metadata pills, and responsive mobile-friendly layouts
+- Timetable pages are available at:
+  - `/schedule` (weekly timetable)
+  - `/session/{id}/detail` (session timetable detail)
 
 ## Tech Stack
 
@@ -26,28 +52,39 @@ composer install
 ```
 
 2. Configure environment:
-- Edit `.env`
+- Edit `.env` / `.env.local`
 - Set `DATABASE_URL` for your PostgreSQL database
 
-3. Run migration:
+3. Run migrations:
 ```bash
 php bin/console doctrine:migrations:migrate
 ```
 
-4. Start server:
+4. Start app:
 ```bash
 composer serve
 ```
 
-Then open: `http://127.0.0.1:8000/`
+Then open `http://127.0.0.1:8000/`.
+
+## One-command Local Startup (Windows)
+
+These scripts automate Docker startup + migration + cache clear + PHP server:
+
+- PowerShell: `./start.ps1`
+- CMD: `start.bat`
 
 ## Main Routes
 
 - `/` Dashboard
 - `/login` Login
 - `/register` Create account
+- `/logout` Logout
 - `/profile` User self-profile
-- `/conference` Conference CRUD
+- `/schedule` Public schedule overview
+- `/session/{id}/detail` Public session/timetable detail
+- `/conference` Conference listing + CRUD
+- `/conference/{id}/show` Conference detail
 - `/session` Session schedule + CRUD
 - `/speaker` Speaker CRUD
 - `/venue` Venue CRUD
@@ -58,35 +95,38 @@ Then open: `http://127.0.0.1:8000/`
 ## Role Permissions
 
 - Public registration creates only `ROLE_USER` accounts.
-- Users can view conference data and edit their own profile.
-- User management page is accessible only by `ROLE_ADMIN`.
-- Admins can promote users to admin and demote admins back to users.
-- The system always keeps at least one admin account.
+- All authenticated users can view scheduler modules.
+- Admin-only mutations are protected with `#[IsGranted('ROLE_ADMIN')]` on create/edit/delete actions.
+- User management is admin-only.
+- The system prevents demoting the last remaining admin.
 
 ## Default Admin Account
 
-Seeded via migration:
+Seeded by migration `Version20260412103000`:
+
 - Email: `Admin@gmail.com`
 - Password: `admin@123`
 
 ## Seed Test Data
 
-Use the built-in seed command to generate realistic data for all modules:
+Use the command below to generate realistic test data:
 
 ```bash
 php bin/console app:seed:test-data --reset
 ```
 
-What it creates:
+Creates:
+
 - 1 admin account
 - 8 normal users
-- 4 speaker accounts + speaker profiles
+- 4 speaker users + speaker profiles
 - 3 venues + 6 rooms
-- 4 conferences (past, running, upcoming)
-- 8 sessions linked to speakers/rooms/conferences
-- 10 registrations across conferences
+- 4 conferences (past/running/upcoming)
+- 8 sessions linked with speakers/rooms/conferences
+- 10 registrations
 
-Known login credentials:
+Sample credentials:
+
 - Admin: `Admin@gmail.com` / `admin@123`
 - Normal user: `john.doe@example.com` / `user@123`
 - Speaker user: `alex.chen.speaker@example.com` / `speaker@123`
@@ -102,13 +142,14 @@ php bin/phpunit
 
 ## Performance Note (Dev)
 
-This project includes `.php-dev.ini` and the `composer serve` script enables:
+This project includes `.php-dev.ini`, and `composer serve` enables:
+
 - `opcache.enable_cli=1`
 - larger `realpath_cache`
 
-This avoids very slow Symfony bootstrap times on Windows when using `php -S`.
+This improves Symfony bootstrap speed on Windows.
 
 ## Notes
 
 - Passwords are hashed via Symfony `UserPasswordHasherInterface`.
-- Current test suite has no test cases yet (`No tests executed!`).
+- The project still contains some legacy schema naming quirks (for example `usser_id`, `createAt`) for backward compatibility with existing migrations.
