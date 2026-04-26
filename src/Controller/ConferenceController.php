@@ -40,20 +40,26 @@ final class ConferenceController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $now = new \DateTime();
-            if (null === $conference->getCreateAt()) {
-                $conference->setCreateAt(clone $now);
+            $dateValidationError = $this->validateConferenceDates($conference);
+            if (null !== $dateValidationError) {
+                $this->addFlash('error', $dateValidationError);
+            } else {
+                $now = new \DateTime();
+                if (null === $conference->getCreateAt()) {
+                    $conference->setCreateAt(clone $now);
+                }
+
+                if (null === $conference->getCreatedAt()) {
+                    $conference->setCreatedAt(clone $now);
+                }
+
+                $entityManager->persist($conference);
+                $entityManager->flush();
+
+                $this->addFlash('success', 'Conference created.');
+
+                return $this->redirectToRoute('app_conference_index');
             }
-            if (null === $conference->getCreatedAt()) {
-                $conference->setCreatedAt(clone $now);
-            }
-
-            $entityManager->persist($conference);
-            $entityManager->flush();
-
-            $this->addFlash('success', 'Conference created.');
-
-            return $this->redirectToRoute('app_conference_index');
         }
 
         return $this->render('conference/new.html.twig', [
@@ -70,14 +76,24 @@ final class ConferenceController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            if (null === $conference->getCreateAt()) {
-                $conference->setCreateAt(new \DateTime());
+            $dateValidationError = $this->validateConferenceDates($conference);
+            if (null !== $dateValidationError) {
+                $this->addFlash('error', $dateValidationError);
+            } else {
+                $now = new \DateTime();
+                if (null === $conference->getCreateAt()) {
+                    $conference->setCreateAt(clone $now);
+                }
+
+                if (null === $conference->getCreatedAt()) {
+                    $conference->setCreatedAt(clone $now);
+                }
+
+                $entityManager->flush();
+                $this->addFlash('success', 'Conference updated.');
+
+                return $this->redirectToRoute('app_conference_index');
             }
-
-            $entityManager->flush();
-            $this->addFlash('success', 'Conference updated.');
-
-            return $this->redirectToRoute('app_conference_index');
         }
 
         return $this->render('conference/edit.html.twig', [
@@ -97,5 +113,31 @@ final class ConferenceController extends AbstractController
         }
 
         return $this->redirectToRoute('app_conference_index');
+    }
+
+    private function validateConferenceDates(Conference $conference): ?string
+    {
+        $startDate = $conference->getStartDate();
+        $endDate = $conference->getEndDate();
+
+        if (!$startDate instanceof \DateTimeInterface || !$endDate instanceof \DateTimeInterface) {
+            return 'Start date and end date are required.';
+        }
+
+        $today = new \DateTimeImmutable('today');
+
+        if ($startDate < $today) {
+            return 'Start date cannot be in the past.';
+        }
+
+        if ($endDate < $today) {
+            return 'End date cannot be in the past.';
+        }
+
+        if ($endDate <= $startDate) {
+            return 'End date must be later than start date.';
+        }
+
+        return null;
     }
 }
